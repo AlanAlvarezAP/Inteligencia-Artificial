@@ -24,7 +24,7 @@ Tareas y Proyectos del curso de **Inteligencia Artificial**
    - [ ] Simulación del N- en raya
    - [ ] Graficas finales
 * Coloreo de Grafos
-   - [ ] Generar Grafos
+   - [ ] Generar Grafos (ER,BA,WS)
    - [ ] Función de coloreo de Grafos
    - [ ] Graficas finales
 * Algoritmos Geneticos
