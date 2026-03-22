@@ -8,7 +8,7 @@ Tareas y Proyectos del curso de **Inteligencia Artificial**
 **Grupo:** CCOMP7-1  
 
 ## Tareas Avance:
-![Busquedas](https://img.shields.io/badge/Busquedas-75%25-green)  
+![Busquedas](https://img.shields.io/badge/Busquedas-85%25-green)  
 ![Juegos](https://img.shields.io/badge/Juegos-0%25-red)  
 ![Coloreo](https://img.shields.io/badge/ColoreoGrafos-0%25-red)  
 ![Algoritmos Geneticos](https://img.shields.io/badge/AlgoritmosGeneticos-0%25-red)  
@@ -17,7 +17,8 @@ Tareas y Proyectos del curso de **Inteligencia Artificial**
 * Busquedas
    - [x] Generar Grafos
    - [x] Completar busquedas con Heuristicas
-   - [ ] Graficas finales
+   - [x] Graficas finales
+   - [ ] Testeos
 * Juegos N-Raya
    - [ ] Generar Arbol Min-Max
    - [ ] Funcion de utilidad
