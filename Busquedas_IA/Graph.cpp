@@ -139,29 +139,39 @@ void Graph::Fill_Heuristics(int end_node) {
 }
 
 void Graph::BFS(int start_index,int end_index,std::vector<Vertex>& vertices,std::map<std::pair<float, float>, std::vector<int>>& offset_by_node,unsigned int VBO,GLFWwindow* window) {
-    std::queue<Traversal> que;
+    auto start_time = std::chrono::high_resolution_clock::now();
+	
+	std::queue<Traversal> que;
     std::vector<bool> visited(graph.size(),false);
     que.push(Traversal{ graph[start_index],{graph[start_index]},0});
     visited[start_index] = true;
 	
+	int vertices_revisados=0;
 	
     while (!que.empty()) {
         auto top = que.front();
-        que.pop();
+        vertices_revisados++;
+		que.pop();
 		
 		updateColorNode({graph[top.origin->index]->x,graph[top.origin->index]->y},0.0f,1.0f,0.0f,vertices,offset_by_node,VBO);
 		dibujarPantalla(window);
 		esperarConEventos(window, 100);
 		
         if (top.origin->index == end_index) {
-            std::cout << "Encontrado con BFS y el camino tomado fue" << std::endl;
             for (auto p : top.path_to_origin) {
                 updateColorNode({p->x,p->y},1.0f,0.0f,0.0f,vertices,offset_by_node,VBO);
 				dibujarPantalla(window);
 				esperarConEventos(window, 100);
             }
+            auto end_time = std::chrono::high_resolution_clock::now();
+			auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
             std::cout << std::endl;
-            std::cout << " El costo de todo el viaje fue de " << top.actu_trav << std::endl;
+			std::cout << "================================= " << std::endl;
+			std::cout << " RESULTADOS BFS " << std::endl;
+            std::cout << " El costo de todo el viaje fue de: " << top.actu_trav << std::endl;
+			std::cout << " Los nodos visitados fueron: " << vertices_revisados << std::endl;
+			std::cout << " Tiempo que se tardo: " << duration.count() << std::endl;
+			std::cout << "================================= " << std::endl;
             return;
         }
         
@@ -179,14 +189,19 @@ void Graph::BFS(int start_index,int end_index,std::vector<Vertex>& vertices,std:
 }
 
 void Graph::DFS(int start_index, int end_index,std::vector<Vertex>& vertices,std::map<std::pair<float, float>, std::vector<int>>& offset_by_node,unsigned int VBO,GLFWwindow* window) {
-    std::stack<Traversal> stac;
+    auto start_time = std::chrono::high_resolution_clock::now();
+	
+	std::stack<Traversal> stac;
     std::vector<bool> visited(graph.size(), false);
     stac.push(Traversal{ graph[start_index],{graph[start_index]},0});
     visited[start_index] = true;
 	
+	int vertices_revisados=0;
+	
+	
     while (!stac.empty()) {
         auto top = stac.top();
-
+		vertices_revisados++;
         stac.pop();
 		
 		updateColorNode({graph[top.origin->index]->x,graph[top.origin->index]->y},0.0f,1.0f,0.0f,vertices,offset_by_node,VBO);
@@ -194,14 +209,20 @@ void Graph::DFS(int start_index, int end_index,std::vector<Vertex>& vertices,std
 		esperarConEventos(window, 100);
 		
         if (top.origin->index == end_index) {
-            std::cout << "Encontrado con DFS y el camino tomado fue" << std::endl;
             for (auto p : top.path_to_origin) {
                 updateColorNode({p->x,p->y},1.0f,0.0f,0.0f,vertices,offset_by_node,VBO);
 				dibujarPantalla(window);
 				esperarConEventos(window, 100);
             }
+			auto end_time = std::chrono::high_resolution_clock::now();
+			auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
             std::cout << std::endl;
-            std::cout << " El costo de todo el viaje fue de " << top.actu_trav << std::endl;
+			std::cout << "================================= " << std::endl;
+			std::cout << " RESULTADOS DFS " << std::endl;
+            std::cout << " El costo de todo el viaje fue de: " << top.actu_trav << std::endl;
+			std::cout << " Los nodos visitados fueron: " << vertices_revisados << std::endl;
+			std::cout << " Tiempo que se tardo: " << duration.count() << std::endl;
+			std::cout << "================================= " << std::endl;
             return;
         }
 
@@ -222,16 +243,18 @@ void Graph::DFS(int start_index, int end_index,std::vector<Vertex>& vertices,std
 
 
 void Graph::Hillclimbing(int start_index,int end_index,std::vector<Vertex>& vertices,std::map<std::pair<float, float>, std::vector<int>>& offset_by_node,unsigned int VBO,GLFWwindow* window) {
-    std::priority_queue<Traversal,std::vector<Traversal>,Traversal::Hill_Climb_Comp> path;
+    auto start_time = std::chrono::high_resolution_clock::now();
+	std::priority_queue<Traversal,std::vector<Traversal>,Traversal::Hill_Climb_Comp> path;
     std::vector<bool> visited(graph.size(), false);
     path.push({ graph[start_index],{graph[start_index]},0 });
 
     // Llenar la heuristicas
     Fill_Heuristics(end_index);
-	
+	int vertices_revisados=0;
 
     while (!path.empty()) {
         auto top = path.top();
+		vertices_revisados++;
         path.pop();
 
         if (visited[top.origin->index]) {
@@ -245,14 +268,20 @@ void Graph::Hillclimbing(int start_index,int end_index,std::vector<Vertex>& vert
 		esperarConEventos(window, 100);
 
         if (top.origin->index == end_index) {
-            std::cout << "Encontrado con Hill climbing y el camino tomado fue" << std::endl;
             for (auto p : top.path_to_origin) {
                 updateColorNode({p->x,p->y},1.0f,0.0f,0.0f,vertices,offset_by_node,VBO);
 				dibujarPantalla(window);
 				esperarConEventos(window, 100);
             }
+            auto end_time = std::chrono::high_resolution_clock::now();
+			auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
             std::cout << std::endl;
-            std::cout << " El costo de todo el viaje fue de " << top.actu_trav << std::endl;
+			std::cout << "================================= " << std::endl;
+			std::cout << " RESULTADOS Hill Climbing " << std::endl;
+            std::cout << " El costo de todo el viaje fue de: " << top.actu_trav << std::endl;
+			std::cout << " Los nodos visitados fueron: " << vertices_revisados << std::endl;
+			std::cout << " Tiempo que se tardo: " << duration.count() << std::endl;
+			std::cout << "================================= " << std::endl;
             return;
         }
 
@@ -271,16 +300,20 @@ void Graph::Hillclimbing(int start_index,int end_index,std::vector<Vertex>& vert
 }
 
 void Graph::A_star(int start_index, int end_index,std::vector<Vertex>& vertices,std::map<std::pair<float, float>, std::vector<int>>& offset_by_node,unsigned int VBO,GLFWwindow* window) {
-    std::priority_queue<Traversal, std::vector<Traversal>, Traversal::A_star_Comp> path;
+    auto start_time = std::chrono::high_resolution_clock::now();
+	
+	std::priority_queue<Traversal, std::vector<Traversal>, Traversal::A_star_Comp> path;
     std::vector<bool> visited(graph.size(), false);
     path.push({ graph[start_index],{graph[start_index]},0 });
 
     // Llenar la heuristicas
     Fill_Heuristics(end_index);
 
+	int vertices_revisados=0;
 
     while (!path.empty()) {
         auto top = path.top();
+		vertices_revisados++;
         path.pop();
 
         if (visited[top.origin->index]) {
@@ -294,14 +327,20 @@ void Graph::A_star(int start_index, int end_index,std::vector<Vertex>& vertices,
 		esperarConEventos(window, 100);
 
         if (top.origin->index == end_index) {
-            std::cout << "Encontrado con A* y el camino tomado fue" << std::endl;
             for (auto p : top.path_to_origin) {
                 updateColorNode({p->x,p->y,},1.0f,0.0f,0.0f,vertices,offset_by_node,VBO);
 				dibujarPantalla(window);
 				esperarConEventos(window, 100);
             }
+            auto end_time = std::chrono::high_resolution_clock::now();
+			auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
             std::cout << std::endl;
-            std::cout << " El costo de todo el viaje fue de " << top.actu_trav << std::endl;
+			std::cout << "================================= " << std::endl;
+			std::cout << " RESULTADOS A* " << std::endl;
+            std::cout << " El costo de todo el viaje fue de: " << top.actu_trav << std::endl;
+			std::cout << " Los nodos visitados fueron: " << vertices_revisados << std::endl;
+			std::cout << " Tiempo que se tardo: " << duration.count() << std::endl;
+			std::cout << "================================= " << std::endl;
             return;
         }
 

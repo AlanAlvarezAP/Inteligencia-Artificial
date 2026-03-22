@@ -135,14 +135,14 @@ void mouse_button_callback(GLFWwindow* window,int button,int action,int mods){
 		if(Node.first != -1 && Node.second != -1){
 			
 			if(starting){
-				if(start_node.first!=-1 && start_node.second !=-1){
+				if((start_node.first!=-1 && start_node.second !=-1) && (start_node != Node)){
 					updateColorNode(start_node,0.5f,0.5f,0.0f,vertices,offset_by_node,VBO);
 				}
 				start_node=Node;
 				updateColorNode(start_node,0.0f,1.0f,0.0f,vertices,offset_by_node,VBO);
 				starting=false;
 			}else{
-				if(end_node.first!=-1 && end_node.second != -1){
+				if((end_node.first!=-1 && end_node.second != -1) && (end_node != Node)){
 					updateColorNode(end_node,0.5f,0.5f,0.0f,vertices,offset_by_node,VBO);
 				}
 				end_node=Node;
@@ -159,6 +159,15 @@ void updateVertices(std::vector<Vertex>& vertices, GLuint VBO) {
     glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
 }
 
+bool ensure_Simulation(){
+	if(start_node == end_node){
+		return false;
+	}
+	if((start_node == std::pair<float,float>{-1.0f,-1.0f}) || (end_node == std::pair<float,float>{-1.0f,-1.0f})){
+		return false;
+	}
+	return true;
+}
 
 void setup_shaders(GLuint &vertex_shader_id,GLuint &fragment_shader_id, GLuint &program_id){
 	int sucess;
@@ -218,7 +227,7 @@ void Set_Vs(std::vector<Vertex> vertices,GLuint &VAO,GLuint &VBO){
 }
 
 void key_callback(GLFWwindow* window,int key,int scan,int action,int mods){
-	if(action == GLFW_PRESS){
+	if(action == GLFW_PRESS && ensure_Simulation()){
 		switch(key){
 			case GLFW_KEY_1:{
 				std::cout << "Generando grafo... " << std::endl;
@@ -258,6 +267,7 @@ void key_callback(GLFWwindow* window,int key,int scan,int action,int mods){
 					updateColorNode(end_node,0.0f,0.0f,1.0f,vertices,offset_by_node,VBO);
 					updateVertices(vertices, VBO);
 				}
+				
 				grafito.BFS(grafito.get_node[start_node],grafito.get_node[end_node],vertices,offset_by_node,(unsigned int)VBO,window);
 				break;
 			}
