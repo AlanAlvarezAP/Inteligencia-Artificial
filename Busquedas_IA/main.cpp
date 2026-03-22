@@ -227,7 +227,7 @@ void Set_Vs(std::vector<Vertex> vertices,GLuint &VAO,GLuint &VBO){
 }
 
 void key_callback(GLFWwindow* window,int key,int scan,int action,int mods){
-	if(action == GLFW_PRESS && ensure_Simulation()){
+	if(action == GLFW_PRESS){
 		switch(key){
 			case GLFW_KEY_1:{
 				std::cout << "Generando grafo... " << std::endl;
@@ -240,12 +240,14 @@ void key_callback(GLFWwindow* window,int key,int scan,int action,int mods){
 					old_offset_by_node.clear();
 					updateVertices(vertices, VBO);
 				}
-				
+				start_node=end_node={-1,-1};
 				grafito.Fill_Graph(vertices,offset_amount,offset_by_node);
 				updateVertices(vertices, VBO);
 				old_vertices=vertices;
 				old_offset=offset_amount;
 				old_offset_by_node=offset_by_node;
+				updateColorNode(start_node,0.5f,0.5f,0.0f,vertices,offset_by_node,VBO);
+				updateColorNode(end_node,0.5f,0.5f,0.0f,vertices,offset_by_node,VBO);
 				break;
 			}
 			case GLFW_KEY_2:{
@@ -255,59 +257,81 @@ void key_callback(GLFWwindow* window,int key,int scan,int action,int mods){
 				old_vertices=vertices;
 				old_offset=offset_amount;
 				old_offset_by_node=offset_by_node;
+				start_node=end_node={-1,-1};
+				updateColorNode(start_node,0.5f,0.5f,0.0f,vertices,offset_by_node,VBO);
+				updateColorNode(end_node,0.5f,0.5f,0.0f,vertices,offset_by_node,VBO);
 				break;
 			}
 			case GLFW_KEY_3:{
-				std::cout << "Ejecutando BFS..." << std::endl;
-				if(!old_offset.empty()){
-					vertices=old_vertices;
-					offset_amount=old_offset;
-					offset_by_node=old_offset_by_node;
-					updateColorNode(start_node,0.0f,1.0f,0.0f,vertices,offset_by_node,VBO);
-					updateColorNode(end_node,0.0f,0.0f,1.0f,vertices,offset_by_node,VBO);
-					updateVertices(vertices, VBO);
+				if(ensure_Simulation()){
+					std::cout << "Ejecutando BFS..." << std::endl;
+					if(!old_offset.empty()){
+						vertices=old_vertices;
+						offset_amount=old_offset;
+						offset_by_node=old_offset_by_node;
+						updateColorNode(start_node,0.0f,1.0f,0.0f,vertices,offset_by_node,VBO);
+						updateColorNode(end_node,0.0f,0.0f,1.0f,vertices,offset_by_node,VBO);
+						updateVertices(vertices, VBO);
+					}
+					grafito.BFS(grafito.get_node[start_node],grafito.get_node[end_node],vertices,offset_by_node,(unsigned int)VBO,window);
+				}else{
+					std::cout << "Asegurate tener los puntos de inicio y fin validos " << std::endl;
 				}
 				
-				grafito.BFS(grafito.get_node[start_node],grafito.get_node[end_node],vertices,offset_by_node,(unsigned int)VBO,window);
 				break;
 			}
 			case GLFW_KEY_4:{
-				std::cout << "Ejecutando DFS..." << std::endl;
-				if(!old_offset.empty()){
-					vertices=old_vertices;
-					offset_amount=old_offset;
-					offset_by_node=old_offset_by_node;
-					updateColorNode(start_node,0.0f,1.0f,0.0f,vertices,offset_by_node,VBO);
-					updateColorNode(end_node,0.0f,0.0f,1.0f,vertices,offset_by_node,VBO);
-					updateVertices(vertices, VBO);
+				if(ensure_Simulation()){
+					std::cout << "Ejecutando DFS..." << std::endl;
+					if(!old_offset.empty()){
+						vertices=old_vertices;
+						offset_amount=old_offset;
+						offset_by_node=old_offset_by_node;
+						updateColorNode(start_node,0.0f,1.0f,0.0f,vertices,offset_by_node,VBO);
+						updateColorNode(end_node,0.0f,0.0f,1.0f,vertices,offset_by_node,VBO);
+						updateVertices(vertices, VBO);
+					}
+					grafito.DFS(grafito.get_node[start_node],grafito.get_node[end_node],vertices,offset_by_node,(unsigned int)VBO,window);
+				}else{
+					std::cout << "Asegurate tener los puntos de inicio y fin validos " << std::endl;
 				}
-				grafito.DFS(grafito.get_node[start_node],grafito.get_node[end_node],vertices,offset_by_node,(unsigned int)VBO,window);
+				
 				break;
 			}
 			case GLFW_KEY_5:{
-				std::cout << "Ejecutando Hill Climbing..." << std::endl;
-				if(!old_offset.empty()){
-					vertices=old_vertices;
-					offset_amount=old_offset;
-					offset_by_node=old_offset_by_node;
-					updateColorNode(start_node,0.0f,1.0f,0.0f,vertices,offset_by_node,VBO);
-					updateColorNode(end_node,0.0f,0.0f,1.0f,vertices,offset_by_node,VBO);
-					updateVertices(vertices, VBO);
+				if(ensure_Simulation()){
+					std::cout << "Ejecutando Hill Climbing..." << std::endl;
+					if(!old_offset.empty()){
+						vertices=old_vertices;
+						offset_amount=old_offset;
+						offset_by_node=old_offset_by_node;
+						updateColorNode(start_node,0.0f,1.0f,0.0f,vertices,offset_by_node,VBO);
+						updateColorNode(end_node,0.0f,0.0f,1.0f,vertices,offset_by_node,VBO);
+						updateVertices(vertices, VBO);
+					}
+					grafito.Hillclimbing(grafito.get_node[start_node],grafito.get_node[end_node],vertices,offset_by_node,(unsigned int)VBO,window);
+				}else{
+					std::cout << "Asegurate tener los puntos de inicio y fin validos " << std::endl;
 				}
-				grafito.Hillclimbing(grafito.get_node[start_node],grafito.get_node[end_node],vertices,offset_by_node,(unsigned int)VBO,window);
+				
 				break;
 			}
 			case GLFW_KEY_6:{
-				std::cout << "Ejecutando A*..." << std::endl;
-				if(!old_offset.empty()){
-					vertices=old_vertices;
-					offset_amount=old_offset;
-					offset_by_node=old_offset_by_node;
-					updateColorNode(start_node,0.0f,1.0f,0.0f,vertices,offset_by_node,VBO);
-					updateColorNode(end_node,0.0f,0.0f,1.0f,vertices,offset_by_node,VBO);
-					updateVertices(vertices, VBO);
+				if(ensure_Simulation()){
+					std::cout << "Ejecutando A*..." << std::endl;
+					if(!old_offset.empty()){
+						vertices=old_vertices;
+						offset_amount=old_offset;
+						offset_by_node=old_offset_by_node;
+						updateColorNode(start_node,0.0f,1.0f,0.0f,vertices,offset_by_node,VBO);
+						updateColorNode(end_node,0.0f,0.0f,1.0f,vertices,offset_by_node,VBO);
+						updateVertices(vertices, VBO);
+					}
+					grafito.A_star(grafito.get_node[start_node],grafito.get_node[end_node],vertices,offset_by_node,(unsigned int)VBO,window);
+				}else{
+					std::cout << "Asegurate tener los puntos de inicio y fin validos " << std::endl;
 				}
-				grafito.A_star(grafito.get_node[start_node],grafito.get_node[end_node],vertices,offset_by_node,(unsigned int)VBO,window);
+				
 				break;
 			}
 			case GLFW_KEY_7:{
