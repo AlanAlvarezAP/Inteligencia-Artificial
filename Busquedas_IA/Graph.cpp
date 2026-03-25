@@ -155,22 +155,22 @@ void Graph::BFS(int start_index,int end_index,std::vector<Vertex>& vertices,std:
 		
 		updateColorNode({graph[top.origin->index]->x,graph[top.origin->index]->y},0.0f,1.0f,0.0f,vertices,offset_by_node,VBO);
 		dibujarPantalla(window);
-		esperarConEventos(window, 100);
+		esperarConEventos(window, 10);
 		
         if (top.origin->index == end_index) {
             for (auto p : top.path_to_origin) {
                 updateColorNode({p->x,p->y},1.0f,0.0f,0.0f,vertices,offset_by_node,VBO);
 				dibujarPantalla(window);
-				esperarConEventos(window, 100);
+				esperarConEventos(window, 10);
             }
             auto end_time = std::chrono::high_resolution_clock::now();
-			auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+			auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
             std::cout << std::endl;
 			std::cout << "================================= " << std::endl;
 			std::cout << " RESULTADOS BFS " << std::endl;
             std::cout << " El costo de todo el viaje fue de: " << top.actu_trav << std::endl;
 			std::cout << " Los nodos visitados fueron: " << vertices_revisados << std::endl;
-			std::cout << " Tiempo que se tardo: " << duration.count() << std::endl;
+			std::cout << " Tiempo que se tardo: " << duration.count() << "s " << std::endl;
 			std::cout << "================================= " << std::endl;
             return;
         }
@@ -206,22 +206,22 @@ void Graph::DFS(int start_index, int end_index,std::vector<Vertex>& vertices,std
 		
 		updateColorNode({graph[top.origin->index]->x,graph[top.origin->index]->y},0.0f,1.0f,0.0f,vertices,offset_by_node,VBO);
 		dibujarPantalla(window);
-		esperarConEventos(window, 100);
+		esperarConEventos(window, 10);
 		
         if (top.origin->index == end_index) {
             for (auto p : top.path_to_origin) {
                 updateColorNode({p->x,p->y},1.0f,0.0f,0.0f,vertices,offset_by_node,VBO);
 				dibujarPantalla(window);
-				esperarConEventos(window, 100);
+				esperarConEventos(window, 10);
             }
 			auto end_time = std::chrono::high_resolution_clock::now();
-			auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+			auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
             std::cout << std::endl;
 			std::cout << "================================= " << std::endl;
 			std::cout << " RESULTADOS DFS " << std::endl;
             std::cout << " El costo de todo el viaje fue de: " << top.actu_trav << std::endl;
 			std::cout << " Los nodos visitados fueron: " << vertices_revisados << std::endl;
-			std::cout << " Tiempo que se tardo: " << duration.count() << std::endl;
+			std::cout << " Tiempo que se tardo: " << duration.count() << "s " << std::endl;
 			std::cout << "================================= " << std::endl;
             return;
         }
@@ -265,22 +265,22 @@ void Graph::Hillclimbing(int start_index,int end_index,std::vector<Vertex>& vert
 
 		updateColorNode({graph[top.origin->index]->x,graph[top.origin->index]->y},0.0f,1.0f,0.0f,vertices,offset_by_node,VBO);
 		dibujarPantalla(window);
-		esperarConEventos(window, 100);
+		esperarConEventos(window, 50);
 
         if (top.origin->index == end_index) {
             for (auto p : top.path_to_origin) {
                 updateColorNode({p->x,p->y},1.0f,0.0f,0.0f,vertices,offset_by_node,VBO);
 				dibujarPantalla(window);
-				esperarConEventos(window, 100);
+				esperarConEventos(window, 50);
             }
             auto end_time = std::chrono::high_resolution_clock::now();
-			auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+			auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
             std::cout << std::endl;
 			std::cout << "================================= " << std::endl;
 			std::cout << " RESULTADOS Hill Climbing " << std::endl;
             std::cout << " El costo de todo el viaje fue de: " << top.actu_trav << std::endl;
 			std::cout << " Los nodos visitados fueron: " << vertices_revisados << std::endl;
-			std::cout << " Tiempo que se tardo: " << duration.count() << std::endl;
+			std::cout << " Tiempo que se tardo: " << duration.count() << "s " << std::endl;
 			std::cout << "================================= " << std::endl;
             return;
         }
@@ -324,22 +324,22 @@ void Graph::A_star(int start_index, int end_index,std::vector<Vertex>& vertices,
 
 		updateColorNode({graph[top.origin->index]->x,graph[top.origin->index]->y},0.0f,1.0f,0.0f,vertices,offset_by_node,VBO);
 		dibujarPantalla(window);
-		esperarConEventos(window, 100);
+		esperarConEventos(window, 50);
 
         if (top.origin->index == end_index) {
             for (auto p : top.path_to_origin) {
                 updateColorNode({p->x,p->y,},1.0f,0.0f,0.0f,vertices,offset_by_node,VBO);
 				dibujarPantalla(window);
-				esperarConEventos(window, 100);
+				esperarConEventos(window, 50);
             }
             auto end_time = std::chrono::high_resolution_clock::now();
-			auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+			auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
             std::cout << std::endl;
 			std::cout << "================================= " << std::endl;
 			std::cout << " RESULTADOS A* " << std::endl;
             std::cout << " El costo de todo el viaje fue de: " << top.actu_trav << std::endl;
 			std::cout << " Los nodos visitados fueron: " << vertices_revisados << std::endl;
-			std::cout << " Tiempo que se tardo: " << duration.count() << std::endl;
+			std::cout << " Tiempo que se tardo: " << duration.count() << "s " << std::endl;
 			std::cout << "================================= " << std::endl;
             return;
         }

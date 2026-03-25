@@ -116,6 +116,9 @@ std::pair<float,float> ClosestNode(double mouseX,double mouseY){
 
 
 void framebuffer_size_callback(GLFWwindow* window,int width,int height){
+	if (width <= 0 || height <= 0) {
+        return;
+    }
 	glViewport(0,0,width,height);
 	
 	WINDOW_HEIGHT=height;
@@ -128,6 +131,11 @@ void framebuffer_size_callback(GLFWwindow* window,int width,int height){
 
 void mouse_button_callback(GLFWwindow* window,int button,int action,int mods){
 	if(button==GLFW_MOUSE_BUTTON_LEFT && action==GLFW_PRESS){
+		if (grafito.graph.empty()) {
+            std::cout << "Grafo vacio genera uno primero (tecla 1)" << std::endl;
+            return;
+        }
+		
 		double mouse_x,mouse_y;
 		glfwGetCursorPos(window,&mouse_x,&mouse_y);
 		
@@ -155,6 +163,14 @@ void mouse_button_callback(GLFWwindow* window,int button,int action,int mods){
 }
 
 void updateVertices(std::vector<Vertex>& vertices, GLuint VBO) {
+	if (vertices.empty()) {
+        std::cout << "updateVertices: vertices vacio, ignorando" << std::endl;
+        return;
+    }
+    if (VBO == 0) {
+        std::cout << "updateVertices: VBO invalido (0)" << std::endl;
+        return;
+    }
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
 }
@@ -230,6 +246,10 @@ void key_callback(GLFWwindow* window,int key,int scan,int action,int mods){
 	if(action == GLFW_PRESS){
 		switch(key){
 			case GLFW_KEY_1:{
+				if (VBO == 0) {
+                    std::cout << "VBO no inicializado. Espera a que termine la carga inicial." << std::endl;
+                    break;
+                }
 				std::cout << "Generando grafo... " << std::endl;
 				if(!vertices.empty() || !old_offset.empty()){
 					vertices.clear();
@@ -238,7 +258,6 @@ void key_callback(GLFWwindow* window,int key,int scan,int action,int mods){
 					old_vertices.clear();
 					old_offset.clear();
 					old_offset_by_node.clear();
-					updateVertices(vertices, VBO);
 				}
 				start_node=end_node={-1,-1};
 				grafito.Fill_Graph(vertices,offset_amount,offset_by_node);
@@ -396,6 +415,13 @@ int main(int argc,char* argv[]){
 	print_menu();
 	
 	while(!glfwWindowShouldClose(window)){
+		int fb_width, fb_height;
+		glfwGetFramebufferSize(window, &fb_width, &fb_height);
+		if (fb_width == 0 || fb_height == 0) {
+			glfwWaitEvents(); 
+			continue;
+		}
+		
 		glClearColor(1.0f,1.0f,1.0f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
