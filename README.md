@@ -2,7 +2,13 @@
 
 Tareas y Proyectos del curso de **Inteligencia Artificial**
 
-**Repositorio de:** Alan Alvarez  
+**Repositorio de:**  
+   - Alan Alvarez
+   - Gabriel Cornejo
+   - Brandon Diaz
+   - Diego Hidalgo
+   - Luigi Valenzuela
+
 **Profesor:** Juan Carlos Guiterrez  
 **Semestre:** 2026-1  
 **Grupo:** CCOMP7-1  
