@@ -8,17 +8,18 @@ Tareas y Proyectos del curso de **Inteligencia Artificial**
 **Grupo:** CCOMP7-1  
 
 ## Tareas Avance:
-![Busquedas](https://img.shields.io/badge/Busquedas-85%25-green)  
+![Busquedas](https://img.shields.io/badge/Busquedas-100%25-green)  
 ![Juegos](https://img.shields.io/badge/Juegos-0%25-red)  
 ![Coloreo](https://img.shields.io/badge/ColoreoGrafos-0%25-red)  
-![Algoritmos Geneticos](https://img.shields.io/badge/AlgoritmosGeneticos-0%25-red)  
+![Algoritmos Geneticos Parser Matematico](https://img.shields.io/badge/AlgoritmosGeneticos-0%25-red)  
+![Algoritmos Geneticos Viajero](https://img.shields.io/badge/AlgoritmosGeneticos-0%25-red)  
 
 ## Pendientes:
 * Busquedas
    - [x] Generar Grafos
    - [x] Completar busquedas con Heuristicas
    - [x] Graficas finales
-   - [ ] Testeos
+   - [x] Testeos
 * Juegos N-Raya
    - [ ] Generar Arbol Min-Max
    - [ ] Funcion de utilidad
@@ -28,8 +29,14 @@ Tareas y Proyectos del curso de **Inteligencia Artificial**
    - [ ] Generar Grafos (ER,BA,WS)
    - [ ] Función de coloreo de Grafos
    - [ ] Graficas finales
-* Algoritmos Geneticos
+* Algoritmos Geneticos Parser
    - [ ] Parser funciones matematicas
+   - [ ] Generación de función de selección
+   - [ ] Función de Cruzamiento
+   - [ ] Función de Mutación
+   - [ ] Elitismo
+   - [ ] Graficos???
+* Algoritmos Geneticos Viajero
    - [ ] Generación de función de selección
    - [ ] Función de Cruzamiento
    - [ ] Función de Mutación
