@@ -15,7 +15,7 @@ Tareas y Proyectos del curso de **Inteligencia Artificial**
 
 ## Tareas Avance:
 ![Busquedas](https://img.shields.io/badge/Busquedas-100%25-green)  
-![Juegos](https://img.shields.io/badge/Juegos-0%25-red)  
+![Juegos](https://img.shields.io/badge/Juegos-100%25-red)  
 ![Coloreo](https://img.shields.io/badge/ColoreoGrafos-0%25-red)  
 ![Algoritmos Geneticos Parser Matematico](https://img.shields.io/badge/AlgoritmosGeneticos-0%25-red)  
 ![Algoritmos Geneticos Viajero](https://img.shields.io/badge/AlgoritmosGeneticos-0%25-red)  
@@ -27,10 +27,10 @@ Tareas y Proyectos del curso de **Inteligencia Artificial**
    - [x] Graficas finales
    - [x] Testeos
 * Juegos N-Raya
-   - [SIWEI] Generar Arbol Min-Max
-   - [SIWEI] Funcion de utilidad
-   - [SIWEI] Simulación del N- en raya
-   - [SIWEI] Graficas finales
+   - [x] Generar Arbol Min-Max
+   - [x] Funcion de utilidad
+   - [x] Simulación del N- en raya
+   - [x] Graficas finales
 * Coloreo de Grafos
    - [ ] Generar Grafos (ER,BA,WS)
    - [ ] Función de coloreo de Grafos
