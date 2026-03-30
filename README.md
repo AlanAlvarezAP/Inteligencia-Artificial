@@ -27,10 +27,10 @@ Tareas y Proyectos del curso de **Inteligencia Artificial**
    - [x] Graficas finales
    - [x] Testeos
 * Juegos N-Raya
-   - [ ] Generar Arbol Min-Max
-   - [ ] Funcion de utilidad
-   - [ ] Simulación del N- en raya
-   - [ ] Graficas finales
+   - [SIWEI] Generar Arbol Min-Max
+   - [SIWEI] Funcion de utilidad
+   - [SIWEI] Simulación del N- en raya
+   - [SIWEI] Graficas finales
 * Coloreo de Grafos
    - [ ] Generar Grafos (ER,BA,WS)
    - [ ] Función de coloreo de Grafos
