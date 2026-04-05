@@ -86,7 +86,7 @@ int main(int argc,char* argv[]){
 	
 	
 	Genetico Alg_Gen;
-	Alg_Gen.Run_Genetics(20);
+	Alg_Gen.Run_Genetics(10);
 	
 	return 0;
 }
