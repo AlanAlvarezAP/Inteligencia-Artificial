@@ -15,5 +15,6 @@
 #include <bitset>
 #include <limits>
 #include <numeric>
+#include <mutex>
 
 #endif
