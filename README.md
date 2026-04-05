@@ -17,7 +17,7 @@ Tareas y Proyectos del curso de **Inteligencia Artificial**
 ![Busquedas](https://img.shields.io/badge/Busquedas-100%25-green)  
 ![Juegos](https://img.shields.io/badge/Juegos-100%25-green)  
 ![Coloreo](https://img.shields.io/badge/ColoreoGrafos-0%25-red)  
-![Algoritmos Geneticos Parser Matematico](https://img.shields.io/badge/AlgoritmosGeneticos-57%25-yellow)  
+![Algoritmos Geneticos Parser Matematico](https://img.shields.io/badge/AlgoritmosGeneticos-71%25-yellow)  
 ![Algoritmos Geneticos Viajero](https://img.shields.io/badge/AlgoritmosGeneticos-0%25-red)  
 
 ## Pendientes:
@@ -41,7 +41,7 @@ Tareas y Proyectos del curso de **Inteligencia Artificial**
    - [x] Función de Cruzamiento
    - [x] Función de Mutación
    - [x] Elitismo
-   - [ ] Threads
+   - [x] Threads
    - [ ] Graficos???
 * Algoritmos Geneticos Viajero
    - [ ] Generación de función de selección
