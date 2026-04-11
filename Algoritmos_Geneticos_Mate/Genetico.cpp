@@ -1,8 +1,6 @@
 #include "Genetico.h"
 #include "config.h"
 
-// ===== Individuo =====
-
 template<int BITS>
 bool Individuo<BITS>::operator<(const Individuo& other) const {
     return this->fitness < other.fitness;
@@ -34,7 +32,6 @@ void Individuo<BITS>::printBits(std::bitset<BITS> bs) {
 
 template class Individuo<5>;
 template class Individuo<6>;
-
 
 double sumar_fitness(double acc, const par_indv& ind) {
     return acc + ind.first.fitness + ind.second.fitness;
