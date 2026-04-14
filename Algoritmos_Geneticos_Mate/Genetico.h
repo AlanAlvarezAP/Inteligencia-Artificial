@@ -13,7 +13,6 @@ public:
 	std::bitset<BITS> number_bits;
 	double fitness;
 	
-	
 	bool operator<(const Individuo& other) const;
 	bool operator==(const Individuo& other) const;
 	void initialize_fit(double number);
@@ -29,6 +28,8 @@ private:
 	std::vector<par_indv> population;
 	std::random_device rd;
 public:
+	std::vector<std::pair<double,double>> best_and_avg;
+
 	void Fill_fitness(int start,int end,std::vector<par_indv> &vec);
 	void Initialize(int size_pop);
 	std::vector<par_indv>::iterator Elitism();

@@ -147,6 +147,12 @@ void Genetico::Mutation(int start, int end, std::vector<par_indv>& new_populatio
 void Genetico::printGen(int gen, par_indv& best_indv) {
     double total = std::accumulate(this->population.begin(), this->population.end(), 0.0, sumar_fitness);
     total /= (int)this->population.size();
+	
+	best_and_avg.push_back({
+		best_indv.first.fitness + best_indv.second.fitness,
+		total
+	});
+	
     int i = 1;
     std::cout << " --------------- GENERATION " << gen << " -------------------" << std::endl;
 	Individuo<5> tmp;
@@ -173,7 +179,10 @@ void Genetico::Run_Genetics(int size) {
 	}
 
     std::vector<std::mt19937> generators;
-    for (int i = 0; i < AMOUNT_THREADS; i++)
+/*     for (int i = 0; i < AMOUNT_THREADS; i++)
+        generators.emplace_back(rd()); */
+	
+	for (int i = 0; i < size; i++)
         generators.emplace_back(rd());
 
     Initialize(size);
@@ -183,30 +192,39 @@ void Genetico::Run_Genetics(int size) {
     old_indv.second.fitness = -std::numeric_limits<double>::infinity();
     par_indv best_indv = old_indv;
 
-    int CHUNK_SIZE = size / AMOUNT_THREADS;
+    //int CHUNK_SIZE = size / AMOUNT_THREADS;
     do {
         old_indv = best_indv;
         auto best = Elitism();
         best_indv = *best;
         printGen(geni, best_indv);
+		
+
+
+		
         this->population.erase(best);
 
         int new_size = population.size();
         std::vector<par_indv> new_population(new_size);
         std::vector<std::thread> threads;
-        CHUNK_SIZE = new_size / AMOUNT_THREADS;
+        // CHUNK_SIZE = new_size / AMOUNT_THREADS;
 
-        for (int i = 0; i < AMOUNT_THREADS; i++) {
+        /* for (int i = 0; i < AMOUNT_THREADS; i++) {
             int start = i * CHUNK_SIZE;
             int end = (i == AMOUNT_THREADS-1) ? new_size : (i+1)*CHUNK_SIZE;
             threads.emplace_back(&Genetico::Tournament_Selection, this, start, end, std::ref(new_population), std::ref(generators[i]));
-        }
+        } */
+		
+		for (int i = 0; i < new_size; i++){
+			threads.emplace_back(&Genetico::Tournament_Selection, this, i, i+1, std::ref(new_population),std::ref(generators[i]));
+		}
+		
         for (auto& t : threads){
 			t.join();
 		}
         threads.clear();
 
-        for (int i = 0; i < AMOUNT_THREADS; i++) {
+        /* for (int i = 0; i < AMOUNT_THREADS; i++) {
             int start = i * CHUNK_SIZE;
             int end = (i == AMOUNT_THREADS-1) ? new_size : (i+1)*CHUNK_SIZE;
             if ((end - start) % 2 != 0){
@@ -215,17 +233,27 @@ void Genetico::Run_Genetics(int size) {
             if (end > start){
                 threads.emplace_back(&Genetico::Crossover, this, start, end, std::ref(new_population), std::ref(generators[i]));
 			}
-        }
+        } */
+		
+		for(int i = 0; i < new_size - 1; i += 2){
+			threads.emplace_back(&Genetico::Crossover, this, i, i+2, std::ref(new_population),std::ref(generators[i]));
+		}
+		
         for (auto& t : threads){
 			t.join();
 		}
         threads.clear();
 
-        for (int i = 0; i < AMOUNT_THREADS; i++) {
+        /* for (int i = 0; i < AMOUNT_THREADS; i++) {
             int start = i * CHUNK_SIZE;
             int end = (i == AMOUNT_THREADS-1) ? new_size : (i+1)*CHUNK_SIZE;
             threads.emplace_back(&Genetico::Mutation, this, start, end, std::ref(new_population), std::ref(generators[i]));
-        }
+        } */
+		
+		for (int i = 0; i < new_size; i++) {
+			threads.emplace_back(&Genetico::Mutation, this, i, i+1, std::ref(new_population), std::ref(generators[i]));
+		}
+		
         for (auto& t : threads){
 			t.join();
 		}
@@ -233,13 +261,18 @@ void Genetico::Run_Genetics(int size) {
 
         new_population.push_back(best_indv);
         this->population = std::move(new_population);
-        CHUNK_SIZE = size / AMOUNT_THREADS;
+        // CHUNK_SIZE = size / AMOUNT_THREADS;
 
-        for (int i = 0; i < AMOUNT_THREADS; i++) {
+        /* for (int i = 0; i < AMOUNT_THREADS; i++) {
             int start = i * CHUNK_SIZE;
             int end = (i == AMOUNT_THREADS-1) ? size : (i+1)*CHUNK_SIZE;
             threads.emplace_back(&Genetico::Fill_fitness, this, start, end, std::ref(this->population));
-        }
+        } */
+		
+		for (int i = 0; i < size; i++) {
+			threads.emplace_back(&Genetico::Fill_fitness, this, i, i+1, std::ref(this->population));
+		}
+		
         for (auto& t : threads){
 			t.join();
 		}
