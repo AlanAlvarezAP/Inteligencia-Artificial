@@ -202,11 +202,11 @@ void draw_graph(const std::vector<std::pair<double,double>>& data){
         glBindVertexArray(vao_ax);
         glDrawArrays(GL_LINES, 0, 4);
 
-        glUniform4f(u_color, 1.f,0.9f,0.f,1.f);
+        glUniform4f(u_color, 0.f,1.0f,0.f,1.f);
         glBindVertexArray(vao_best);
         glDrawArrays(GL_LINE_STRIP, 0, best_verts.size()/2);
 
-        glUniform4f(u_color, 0.f,0.9f,1.f,1.f);
+		glUniform4f(u_color, 0.f,0.9f,1.f,1.f);
         glBindVertexArray(vao_avg);
         glDrawArrays(GL_LINE_STRIP, 0, avg_verts.size()/2);
 
@@ -232,7 +232,7 @@ void draw_graph(const std::vector<std::pair<double,double>>& data){
 void print_menu() {
     std::cout << "===================================" << std::endl;
     std::cout << "|        Bienvenido a             |" << std::endl;
-    std::cout << "| Algoritmos geneticos maximizador|" << std::endl;
+    std::cout << "| Algoritmos geneticos minimizador|" << std::endl;
     std::cout << "|                                 |" << std::endl;
     std::cout << "|  1. Simular Algoritmo           |" << std::endl;
     std::cout << "|  2. Generar graficos            |" << std::endl;
@@ -249,10 +249,10 @@ int main(int argc,char* argv[]){
         int option; std::cin >> option;
 
         if(option == 1){
-            Alg_Gen.Run_Genetics(50);
+            Alg_Gen.Run_Genetics(10);
             exec = true;
 			for(auto& pair: Alg_Gen.best_and_avg){
-				std::cout << pair.first << " ";
+				std::cout << pair.second << " ";
 			}
 			std::cout << std::endl;
 			
@@ -262,8 +262,11 @@ int main(int argc,char* argv[]){
                 continue;
             }
             draw_graph(Alg_Gen.best_and_avg);
-        } else {
-            break;
+        } else if(option == 3){
+			break;
+		} 
+		else {
+			std::cout << " Opcion no valida :( " << std::endl;
         }
     }
     return 0;
