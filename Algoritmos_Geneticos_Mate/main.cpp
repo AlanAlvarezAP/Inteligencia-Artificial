@@ -242,7 +242,8 @@ void print_menu() {
     std::cout << "|  2. Generar graficos            |" << std::endl;
     std::cout << "|  3. Probabilidad de mutacion    |" << std::endl;
 	std::cout << "|  4. Limite de iteraciones       |" << std::endl;
-	std::cout << "|  5. Salir                       |" << std::endl;
+	std::cout << "|  5. Poblacion                   |" << std::endl;
+	std::cout << "|  6. Salir                       |" << std::endl;
     std::cout << "===================================" << std::endl;
 }
 
@@ -256,7 +257,7 @@ int main(int argc,char* argv[]){
 
         if(option == 1){
 			
-            Alg_Gen.Run_Genetics(10);
+            Alg_Gen.Run_Genetics();
             exec = true;
 			
 			std::cout << "Datos mejor individuo: ";
@@ -289,6 +290,11 @@ int main(int argc,char* argv[]){
 			std:: cin >> limit_iteracion;
 			Alg_Gen.setLimitIt(limit_iteracion);
 		}else if(option == 5){
+			std::cout << "Poblacion: ";
+			int poblacion;
+			std:: cin >> poblacion;
+			Alg_Gen.setSize(poblacion);
+		}else if(option == 6){
 			break;
 		}else {
 			std::cout << " Opcion no valida :( " << std::endl;

@@ -50,16 +50,16 @@ void Genetico::Fill_fitness(int start, int end, std::vector<par_indv>& vec) {
     }
 }
 
-void Genetico::Initialize(int size_pop) {
+void Genetico::Initialize() {
 	this->population.clear();
 	population_size=0;
 	this->best_and_avg.clear();
     std::uniform_int_distribution<> dist_x(0, 31);
     std::uniform_int_distribution<> dist_y(0, 63);
     std::mt19937 local_gen(rd());
-    this->population_size = size_pop;
+    this->population_size = size;
 
-    while (size_pop--) {
+    while (size--) {
         Individuo<5> tmp;
         Individuo<6> tmp_2;
 		int x_value,y_value=0;
@@ -176,7 +176,7 @@ void Genetico::printGen(int gen, par_indv& best_indv) {
     std::cout << " -------------------------------------------------------------" << std::endl; 
 }
 
-void Genetico::Run_Genetics(int size) {
+void Genetico::Run_Genetics() {
     if (size < AMOUNT_THREADS) { 
 		std::cout << " POBLACION MUY PEQUENA" << std::endl; 
 		return; 
@@ -187,7 +187,7 @@ void Genetico::Run_Genetics(int size) {
 	for (int i = 0; i < size; i++)
         generators.emplace_back(rd());
 
-    Initialize(size);
+    Initialize();
     int geni = 1, countdown = 0;
     par_indv old_indv{};
     old_indv.first.fitness  = -std::numeric_limits<double>::infinity();
@@ -279,4 +279,14 @@ void Genetico::setLimitIt(int new_limit){
 	}
 	std::cout << "Cambio exitoso" << std::endl;
 	limit = new_limit;
+}
+
+void Genetico::setSize(int new_size){
+	if (new_size < 0){
+		size = 10;
+		std::cout << "Cambio no exitoso, introduzca un valor mayor a 0" << std::endl;
+		return;
+	}
+	std::cout << "Cambio exitoso" << std::endl;
+	size = new_size;
 }

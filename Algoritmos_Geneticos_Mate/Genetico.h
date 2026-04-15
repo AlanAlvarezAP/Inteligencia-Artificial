@@ -28,18 +28,20 @@ private:
 	
 	float PROB_MUT = 0.02;
 	int limit = 10;
+	int size = 10;
 	
 public:
 	std::vector<std::pair<double,double>> best_and_avg;
 	void Fill_fitness(int start,int end,std::vector<par_indv> &vec);
-	void Initialize(int size_pop);
+	void Initialize();
 	std::vector<par_indv>::iterator Elitism();
 	void Tournament_Selection(int start,int end,std::vector<par_indv>& new_pop,std::mt19937 &local_gen);
 	void Crossover(int start,int end,std::vector<par_indv>& new_pop,std::mt19937 &local_gen);
 	void Mutation(int start,int end,std::vector<par_indv>& new_pop,std::mt19937 &local_gen);
-	void Run_Genetics(int size);
+	void Run_Genetics();
 	void printGen(int gen,par_indv& best_indv);
 	
 	void setProbMut(float new_prob);
 	void setLimitIt(int new_limit);
+	void setSize(int new_size);
 };
