@@ -20,7 +20,9 @@ void Individuo<BITS>::initialize_fit(double number) {
 template<int BITS>
 void Individuo<BITS>::update_real_value(double x, double y) {
     this->real_value = number_bits.to_ulong();
-    this->fitness = x*x - 2*x*y + y*y;
+    //this->fitness = x*x - 2*x*y + y*y;
+    this->fitness = (x - 5)*(x - 3)+ (y - 1)*(y - 5) + 10 * (sin(x) + cos(y));
+
 }
 
 template<int BITS>
@@ -199,8 +201,6 @@ void Genetico::Run_Genetics(int size) {
         best_indv = *best;
         printGen(geni, best_indv);
 		
-
-
 		
         this->population.erase(best);
 

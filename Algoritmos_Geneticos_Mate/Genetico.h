@@ -3,7 +3,7 @@
 
 const double TOL=1e-7;
 const int AMOUNT_THREADS=4;
-const float PROB_MUT=0.2;
+const float PROB_MUT=0.02;
 
 
 template<int BITS>
