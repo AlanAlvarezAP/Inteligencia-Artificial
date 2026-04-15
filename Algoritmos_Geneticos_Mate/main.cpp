@@ -51,21 +51,20 @@ const char* frag_src =
 
 GLuint make_shader(){
     GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs,1,&vert_src,NULL); glCompileShader(vs);
+    glShaderSource(vs,1,&vert_src,NULL); 
+	glCompileShader(vs);
     GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs,1,&frag_src,NULL); glCompileShader(fs);
+    glShaderSource(fs,1,&frag_src,NULL); 
+	glCompileShader(fs);
     GLuint prog = glCreateProgram();
-    glAttachShader(prog,vs); glAttachShader(prog,fs);
+    glAttachShader(prog,vs); 
+	glAttachShader(prog,fs);
     glLinkProgram(prog);
     glDeleteShader(vs); glDeleteShader(fs);
     return prog;
 }
 
-std::vector<float> build_line(
-    const std::vector<std::pair<double,double>>& data,
-    bool use_best,
-    double min_y,
-    double max_y)
+std::vector<float> build_line(const std::vector<std::pair<double,double>>& data,bool use_best,double min_y,double max_y)
 {
     int n = data.size();
     std::vector<float> verts;
@@ -77,8 +76,8 @@ std::vector<float> build_line(
     for(int i = 0; i < n; i++){
         float x = -0.9f + 1.8f * i / (float)((n > 1) ? (n - 1) : 1);
 
-        double v = use_best ? data[i].first: data[i].second;
-        float y = -0.9f + 1.8f * (float)((v - min_y) / range);
+        double data_used = use_best ? data[i].first: data[i].second;
+        float y = -0.9f + 1.8f * (float)((data_used - min_y) / range);
 
         verts.push_back(x);
         verts.push_back(y);
@@ -104,13 +103,13 @@ void draw_label(GLuint prog, GLint u_color, const char* text, float x, float y) 
     glUniform4f(u_color, 1.f, 1.f, 1.f, 1.f);
 
     float* verts = (float*)buf;
-    std::vector<float> pts;
+    std::vector<float> points;
     for (int i = 0; i < vertex * 4; i++) {
-        pts.push_back(x + verts[i*4+0] * sx);
-        pts.push_back(y - verts[i*4+1] * sy);
+        points.push_back(x + verts[i*4+0] * sx);
+        points.push_back(y - verts[i*4+1] * sy);
     }
 	
-    glBufferData(GL_ARRAY_BUFFER, pts.size() * sizeof(float), pts.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(float), points.data(), GL_DYNAMIC_DRAW);
 
     for (int i = 0; i < vertex; i++)
         glDrawArrays(GL_LINES, i * 4, 4);
@@ -125,7 +124,10 @@ void draw_graph(const std::vector<std::pair<double,double>>& data){
     glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT,"Fitness por Generacion", NULL, NULL);
-    if(!window){ glfwTerminate(); return; }
+    if(!window){ 
+		glfwTerminate(); 
+		return; 
+	}
     glfwMakeContextCurrent(window);
 
     if(!gladLoadGL(glfwGetProcAddress)){
@@ -145,7 +147,8 @@ void draw_graph(const std::vector<std::pair<double,double>>& data){
 		max_y = std::max({max_y, p.first, p.second});
 	}
 
-	if(max_y - min_y < 1e-12) max_y = min_y + 1.0;
+	if(max_y - min_y < 1e-12) 
+		max_y = min_y + 1.0;
 
 	auto best_verts = build_line(data, true,  min_y, max_y);
 	auto avg_verts  = build_line(data, false, min_y, max_y);
@@ -160,7 +163,8 @@ void draw_graph(const std::vector<std::pair<double,double>>& data){
     glEnableVertexAttribArray(0);
 
     GLuint vao_avg, vbo_avg;
-    glGenVertexArrays(1,&vao_avg); glGenBuffers(1,&vbo_avg);
+    glGenVertexArrays(1,&vao_avg); 
+	glGenBuffers(1,&vbo_avg);
     glBindVertexArray(vao_avg);
     glBindBuffer(GL_ARRAY_BUFFER, vbo_avg);
     glBufferData(GL_ARRAY_BUFFER,
@@ -236,7 +240,9 @@ void print_menu() {
     std::cout << "|                                 |" << std::endl;
     std::cout << "|  1. Simular Algoritmo           |" << std::endl;
     std::cout << "|  2. Generar graficos            |" << std::endl;
-    std::cout << "|  3. Salir                       |" << std::endl;
+    std::cout << "|  3. Probabilidad de mutacion    |" << std::endl;
+	std::cout << "|  4. Limite de iteraciones       |" << std::endl;
+	std::cout << "|  5. Salir                       |" << std::endl;
     std::cout << "===================================" << std::endl;
 }
 
@@ -249,8 +255,17 @@ int main(int argc,char* argv[]){
         int option; std::cin >> option;
 
         if(option == 1){
+			
             Alg_Gen.Run_Genetics(10);
             exec = true;
+			
+			std::cout << "Datos mejor individuo: ";
+			for(auto& pair: Alg_Gen.best_and_avg){
+				std::cout << pair.first << " ";
+			}
+			std::cout << std::endl;
+			
+			std::cout << "Datos promedio poblacion: ";
 			for(auto& pair: Alg_Gen.best_and_avg){
 				std::cout << pair.second << " ";
 			}
@@ -262,10 +277,20 @@ int main(int argc,char* argv[]){
                 continue;
             }
             draw_graph(Alg_Gen.best_and_avg);
-        } else if(option == 3){
+			
+        }else if(option == 3){
+			std::cout << "Probabilidad de mutacion [0 - 1]: ";
+			float prob_mut;
+			std:: cin >> prob_mut;
+			Alg_Gen.setProbMut(prob_mut);
+		}else if(option == 4){
+			std::cout << "Limite de iteracion: ";
+			int limit_iteracion;
+			std:: cin >> limit_iteracion;
+			Alg_Gen.setLimitIt(limit_iteracion);
+		}else if(option == 5){
 			break;
-		} 
-		else {
+		}else {
 			std::cout << " Opcion no valida :( " << std::endl;
         }
     }

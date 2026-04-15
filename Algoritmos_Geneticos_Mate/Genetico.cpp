@@ -257,6 +257,26 @@ void Genetico::Run_Genetics(int size) {
 		}
 
         geni++;
-    } while (countdown < 10 && geni < 1000);
+    } while (countdown < limit && geni < 1000);
 	
+}
+
+void Genetico::setProbMut(float new_prob){
+	if(new_prob > 1 || new_prob < 0){
+		PROB_MUT = 0.02;
+		std::cout << "Cambio no exitoso, introduzca un valor del 0 al 1" << std::endl;
+		return;
+	}
+	std::cout << "Cambio exitoso" << std::endl;
+	PROB_MUT = new_prob;
+}
+
+void Genetico::setLimitIt(int new_limit){
+	if(new_limit < 1){
+		limit = 10;
+		std::cout << "Cambio no exitoso, introduzca un valor mayor a 0" << std::endl;
+		return;
+	}
+	std::cout << "Cambio exitoso" << std::endl;
+	limit = new_limit;
 }

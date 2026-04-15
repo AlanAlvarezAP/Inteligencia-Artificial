@@ -3,8 +3,6 @@
 
 const double TOL=1e-7;
 const int AMOUNT_THREADS=4;
-const float PROB_MUT=0.001;
-
 
 template<int BITS>
 class Individuo{
@@ -28,6 +26,9 @@ private:
 	std::vector<par_indv> population;
 	std::random_device rd;
 	
+	float PROB_MUT = 0.02;
+	int limit = 10;
+	
 public:
 	std::vector<std::pair<double,double>> best_and_avg;
 	void Fill_fitness(int start,int end,std::vector<par_indv> &vec);
@@ -38,4 +39,7 @@ public:
 	void Mutation(int start,int end,std::vector<par_indv>& new_pop,std::mt19937 &local_gen);
 	void Run_Genetics(int size);
 	void printGen(int gen,par_indv& best_indv);
+	
+	void setProbMut(float new_prob);
+	void setLimitIt(int new_limit);
 };
