@@ -2,7 +2,6 @@
 #include "config.h"
 
 const double TOL=1e-7;
-const int AMOUNT_THREADS=4;
 
 template<int BITS>
 class Individuo{
