@@ -11,6 +11,9 @@
 #include <vector>
 #include <algorithm>
 
+#define STB_EASY_FONT_IMPLEMENTATION
+#include "stb_easy_font.h"
+
 const int WINDOW_WIDTH=800,WINDOW_HEIGHT=600;
 
 void framebuffer_size_callback(GLFWwindow* window,int width,int height){
@@ -81,6 +84,38 @@ std::vector<float> build_line(
         verts.push_back(y);
     }
     return verts;
+}
+
+void draw_label(GLuint prog, GLint u_color, const char* text, float x, float y) {
+    static char buf[5000];
+    int vertex = stb_easy_font_print(0, 0, (char*)text, NULL, buf, sizeof(buf));
+
+    unsigned int vao, vbo;
+    glGenVertexArrays(1, &vao); 
+	glGenBuffers(1, &vbo);
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertex * 4 * 4 * sizeof(float), buf, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    float sx = 1.0f / 400.0f, sy = 1.0f / 300.0f;
+    glUseProgram(prog);
+    glUniform4f(u_color, 1.f, 1.f, 1.f, 1.f);
+
+    float* verts = (float*)buf;
+    std::vector<float> pts;
+    for (int i = 0; i < vertex * 4; i++) {
+        pts.push_back(x + verts[i*4+0] * sx);
+        pts.push_back(y - verts[i*4+1] * sy);
+    }
+	
+    glBufferData(GL_ARRAY_BUFFER, pts.size() * sizeof(float), pts.data(), GL_DYNAMIC_DRAW);
+
+    for (int i = 0; i < vertex; i++)
+        glDrawArrays(GL_LINES, i * 4, 4);
+
+    glDeleteVertexArrays(1, &vao); glDeleteBuffers(1, &vbo);
 }
 
 void draw_graph(const std::vector<std::pair<double,double>>& data){
@@ -155,7 +190,6 @@ void draw_graph(const std::vector<std::pair<double,double>>& data){
     glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,2*sizeof(float),(void*)0);
     glEnableVertexAttribArray(0);
 
-    glLineWidth(2.0f);
 
     while(!glfwWindowShouldClose(window)){
 		
@@ -175,6 +209,10 @@ void draw_graph(const std::vector<std::pair<double,double>>& data){
         glUniform4f(u_color, 0.f,0.9f,1.f,1.f);
         glBindVertexArray(vao_avg);
         glDrawArrays(GL_LINE_STRIP, 0, avg_verts.size()/2);
+
+		draw_label(prog, u_color, "generacion", 0.3f, -0.93f);
+		draw_label(prog, u_color, "fitness", -0.88f, 0.95f);
+				
 
         glfwSwapBuffers(window);
         glfwPollEvents();
