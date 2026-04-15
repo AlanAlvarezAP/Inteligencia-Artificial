@@ -58,8 +58,8 @@ void Genetico::Initialize() {
     std::uniform_int_distribution<> dist_y(0, 63);
     std::mt19937 local_gen(rd());
     this->population_size = size;
-
-    while (size--) {
+	int size_tmp=size;
+    while (size_tmp--) {
         Individuo<5> tmp;
         Individuo<6> tmp_2;
 		int x_value,y_value=0;
@@ -177,15 +177,11 @@ void Genetico::printGen(int gen, par_indv& best_indv) {
 }
 
 void Genetico::Run_Genetics() {
-    if (size < AMOUNT_THREADS) { 
-		std::cout << " POBLACION MUY PEQUENA" << std::endl; 
-		return; 
-	}
-
     std::vector<std::mt19937> generators;
 	
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < size; i++){
         generators.emplace_back(rd());
+	}
 
     Initialize();
     int geni = 1, countdown = 0;
@@ -282,7 +278,7 @@ void Genetico::setLimitIt(int new_limit){
 }
 
 void Genetico::setSize(int new_size){
-	if (new_size < 0){
+	if (new_size <= 2){
 		size = 10;
 		std::cout << "Cambio no exitoso, introduzca un valor mayor a 0" << std::endl;
 		return;
