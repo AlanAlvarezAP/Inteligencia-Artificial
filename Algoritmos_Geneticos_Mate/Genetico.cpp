@@ -21,7 +21,7 @@ template<int BITS>
 void Individuo<BITS>::update_real_value(double x, double y) {
     this->real_value = number_bits.to_ulong();
     //this->fitness = x*x - 2*x*y + y*y;
-    this->fitness = (x - 5)*(x - 3)+ (y - 1)*(y - 5) + 10 * (sin(x) + cos(y));
+    this->fitness = x*x - 2*x*y+y*y;
 
 }
 
@@ -36,7 +36,7 @@ template class Individuo<5>;
 template class Individuo<6>;
 
 double sumar_fitness(double acc, const par_indv& ind) {
-    return acc + ind.first.fitness + ind.second.fitness;
+    return acc + ind.first.fitness;
 }
 
 void Genetico::Fill_fitness(int start, int end, std::vector<par_indv>& vec) {
@@ -51,6 +51,9 @@ void Genetico::Fill_fitness(int start, int end, std::vector<par_indv>& vec) {
 }
 
 void Genetico::Initialize(int size_pop) {
+	this->population.clear();
+	population_size=0;
+	this->best_and_avg.clear();
     std::uniform_int_distribution<> dist_x(0, 31);
     std::uniform_int_distribution<> dist_y(0, 63);
     std::mt19937 local_gen(rd());
@@ -59,7 +62,11 @@ void Genetico::Initialize(int size_pop) {
     while (size_pop--) {
         Individuo<5> tmp;
         Individuo<6> tmp_2;
-        int x_value = dist_x(local_gen), y_value = dist_y(local_gen);
+		int x_value,y_value=0;
+		do{
+			x_value = dist_x(local_gen);
+			y_value = dist_y(local_gen);
+		}while(x_value == y_value);
         tmp.initialize_fit(x_value);
         tmp_2.initialize_fit(y_value);
         tmp.update_real_value(x_value, y_value);
@@ -150,28 +157,23 @@ void Genetico::printGen(int gen, par_indv& best_indv) {
     double total = std::accumulate(this->population.begin(), this->population.end(), 0.0, sumar_fitness);
     total /= (int)this->population.size();
 	
-	best_and_avg.push_back({
-		best_indv.first.fitness + best_indv.second.fitness,
-		total
-	});
+	best_and_avg.push_back({best_indv.first.fitness + best_indv.second.fitness,total});
 	
     int i = 1;
     std::cout << " --------------- GENERATION " << gen << " -------------------" << std::endl;
 	Individuo<5> tmp;
 	Individuo<6> tmp_2;
     for (const auto& p : this->population) {
-        std::cout << "Individual: [" << i++ << "] with value in x -> " << p.first.real_value
-                  << " and value in y -> " << p.second.real_value << " and bits for x -> ";
+        std::cout << "Individual: [" << i++ << "] with value in x -> " << p.first.real_value<< " and value in y -> " << p.second.real_value << " and bits for x -> ";
         tmp.printBits(p.first.number_bits);
         std::cout << " and bits for y -> ";
         tmp_2.printBits(p.second.number_bits);
-        std::cout << " and fitness for x -> " << p.first.fitness
-                  << " and fitness for y -> " << p.second.fitness << std::endl;
+        std::cout << " and fitness -> " << p.first.fitness << std::endl;
     }
     std::cout << " Best individual in x -> " << best_indv.first.real_value
               << " and in y -> " << best_indv.second.real_value << std::endl;
     std::cout << " The mean -> " << total << std::endl;
-    std::cout << " -------------------------------------------------------------" << std::endl;
+    std::cout << " -------------------------------------------------------------" << std::endl; 
 }
 
 void Genetico::Run_Genetics(int size) {
@@ -181,8 +183,6 @@ void Genetico::Run_Genetics(int size) {
 	}
 
     std::vector<std::mt19937> generators;
-/*     for (int i = 0; i < AMOUNT_THREADS; i++)
-        generators.emplace_back(rd()); */
 	
 	for (int i = 0; i < size; i++)
         generators.emplace_back(rd());
@@ -194,26 +194,18 @@ void Genetico::Run_Genetics(int size) {
     old_indv.second.fitness = -std::numeric_limits<double>::infinity();
     par_indv best_indv = old_indv;
 
-    //int CHUNK_SIZE = size / AMOUNT_THREADS;
     do {
         old_indv = best_indv;
         auto best = Elitism();
         best_indv = *best;
-        printGen(geni, best_indv);
-		
+        
+		printGen(geni, best_indv);
 		
         this->population.erase(best);
 
         int new_size = population.size();
         std::vector<par_indv> new_population(new_size);
         std::vector<std::thread> threads;
-        // CHUNK_SIZE = new_size / AMOUNT_THREADS;
-
-        /* for (int i = 0; i < AMOUNT_THREADS; i++) {
-            int start = i * CHUNK_SIZE;
-            int end = (i == AMOUNT_THREADS-1) ? new_size : (i+1)*CHUNK_SIZE;
-            threads.emplace_back(&Genetico::Tournament_Selection, this, start, end, std::ref(new_population), std::ref(generators[i]));
-        } */
 		
 		for (int i = 0; i < new_size; i++){
 			threads.emplace_back(&Genetico::Tournament_Selection, this, i, i+1, std::ref(new_population),std::ref(generators[i]));
@@ -224,16 +216,6 @@ void Genetico::Run_Genetics(int size) {
 		}
         threads.clear();
 
-        /* for (int i = 0; i < AMOUNT_THREADS; i++) {
-            int start = i * CHUNK_SIZE;
-            int end = (i == AMOUNT_THREADS-1) ? new_size : (i+1)*CHUNK_SIZE;
-            if ((end - start) % 2 != 0){
-				end--;
-			}
-            if (end > start){
-                threads.emplace_back(&Genetico::Crossover, this, start, end, std::ref(new_population), std::ref(generators[i]));
-			}
-        } */
 		
 		for(int i = 0; i < new_size - 1; i += 2){
 			threads.emplace_back(&Genetico::Crossover, this, i, i+2, std::ref(new_population),std::ref(generators[i]));
@@ -244,11 +226,6 @@ void Genetico::Run_Genetics(int size) {
 		}
         threads.clear();
 
-        /* for (int i = 0; i < AMOUNT_THREADS; i++) {
-            int start = i * CHUNK_SIZE;
-            int end = (i == AMOUNT_THREADS-1) ? new_size : (i+1)*CHUNK_SIZE;
-            threads.emplace_back(&Genetico::Mutation, this, start, end, std::ref(new_population), std::ref(generators[i]));
-        } */
 		
 		for (int i = 0; i < new_size; i++) {
 			threads.emplace_back(&Genetico::Mutation, this, i, i+1, std::ref(new_population), std::ref(generators[i]));
@@ -261,13 +238,6 @@ void Genetico::Run_Genetics(int size) {
 
         new_population.push_back(best_indv);
         this->population = std::move(new_population);
-        // CHUNK_SIZE = size / AMOUNT_THREADS;
-
-        /* for (int i = 0; i < AMOUNT_THREADS; i++) {
-            int start = i * CHUNK_SIZE;
-            int end = (i == AMOUNT_THREADS-1) ? size : (i+1)*CHUNK_SIZE;
-            threads.emplace_back(&Genetico::Fill_fitness, this, start, end, std::ref(this->population));
-        } */
 		
 		for (int i = 0; i < size; i++) {
 			threads.emplace_back(&Genetico::Fill_fitness, this, i, i+1, std::ref(this->population));
@@ -288,4 +258,5 @@ void Genetico::Run_Genetics(int size) {
 
         geni++;
     } while (countdown < 10 && geni < 1000);
+	
 }
