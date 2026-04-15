@@ -3,7 +3,7 @@
 
 const double TOL=1e-7;
 const int AMOUNT_THREADS=4;
-const float PROB_MUT=0.02;
+const float PROB_MUT=0.001;
 
 
 template<int BITS>
@@ -27,9 +27,9 @@ private:
 	int population_size;
 	std::vector<par_indv> population;
 	std::random_device rd;
+	
 public:
 	std::vector<std::pair<double,double>> best_and_avg;
-
 	void Fill_fitness(int start,int end,std::vector<par_indv> &vec);
 	void Initialize(int size_pop);
 	std::vector<par_indv>::iterator Elitism();
