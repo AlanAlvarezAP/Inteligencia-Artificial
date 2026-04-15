@@ -28,12 +28,9 @@ void key_callback(GLFWwindow* window,int key,int scan,int action,int mods){
             }
             break;
         }
-        case GLFW_KEY_ESCAPE:{
-            std::cout << "ESC pressed leaving... " << std::endl;
-            glfwSetWindowShouldClose(window,GLFW_TRUE);
-            break;
-        }
-        default: break;
+        default:{
+			break;
+		}
     }
 }
 
@@ -284,16 +281,19 @@ int main(int argc,char* argv[]){
 			float prob_mut;
 			std:: cin >> prob_mut;
 			Alg_Gen.setProbMut(prob_mut);
+			exec=false;
 		}else if(option == 4){
 			std::cout << "Limite de iteracion: ";
 			int limit_iteracion;
 			std:: cin >> limit_iteracion;
 			Alg_Gen.setLimitIt(limit_iteracion);
+			exec=false;
 		}else if(option == 5){
 			std::cout << "Poblacion: ";
 			int poblacion;
 			std:: cin >> poblacion;
 			Alg_Gen.setSize(poblacion);
+			exec=false;
 		}else if(option == 6){
 			break;
 		}else {
