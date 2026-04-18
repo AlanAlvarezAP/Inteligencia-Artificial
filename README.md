@@ -44,8 +44,10 @@ Tareas y Proyectos del curso de **Inteligencia Artificial**
    - [x] Threads (50%)
    - [x] Graficos???
 * Algoritmos Geneticos Viajero
+   - [ ] Grafo base
    - [ ] Generación de función de selección
    - [ ] Función de Cruzamiento
    - [ ] Función de Mutación
    - [ ] Elitismo
-   - [ ] Graficos???
+   - [ ] Threads
+   - [ ] Graficos
