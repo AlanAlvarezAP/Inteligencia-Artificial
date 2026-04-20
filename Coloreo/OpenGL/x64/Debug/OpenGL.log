@@ -1,3 +1,0 @@
-﻿  OpenGL.cpp
-D:\U\Coloreo\OpenGL.cpp(101,15): warning C4244: 'argumento': conversión de 'time_t' a 'unsigned int'; posible pérdida de datos
-  OpenGL.vcxproj -> D:\U\Coloreo\x64\Debug\OpenGL.exe
