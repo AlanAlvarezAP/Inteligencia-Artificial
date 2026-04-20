@@ -18,7 +18,7 @@ Tareas y Proyectos del curso de **Inteligencia Artificial**
 ![Juegos](https://img.shields.io/badge/Juegos-100%25-green)  
 ![Coloreo](https://img.shields.io/badge/ColoreoGrafos-100%25-green)  
 ![Algoritmos Geneticos Parser Matematico](https://img.shields.io/badge/AlgoritmosGeneticosParser-100%25-green)  
-![Algoritmos Geneticos Viajero](https://img.shields.io/badge/AlgoritmosGeneticosViajero-100%25-red)  
+![Algoritmos Geneticos Viajero](https://img.shields.io/badge/AlgoritmosGeneticosViajero-100%25-green)  
 
 ## Pendientes:
 * Busquedas
