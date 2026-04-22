@@ -1,25 +1,11 @@
-#define GLAD_GL_IMPLEMENTATION
-#include <glad/gl.h>
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-
-#define STB_EASY_FONT_IMPLEMENTATION
-#include "stb_easy_font.h"
-
-#include <iostream>
-#include <vector>
-#include <algorithm>
 #include <numeric>
-#include <thread>
-#include <random>
-#include <mutex>
-#include <cmath>
 #include <ctime>
-#include <atomic>
 #include <fstream>
 #include <string>
 
-using namespace std;
+#include "genetic.hpp"
+#include "config.hpp"
+#include "easyFontRenderer.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -83,379 +69,6 @@ const char *fragmentShaderSource_axes = "#version 330 core\n"
 
 // ===========================================================
 
-// EASY FONT
- 
-// txt shaders
-const char *textVertSrc = "#version 330 core\n"
-    "layout (location = 0) in vec2 aPos;\n"
-    "uniform vec2 uResolution;\n"
-    "uniform vec2 uOffset;\n"
-    "void main() {\n"
-    "    vec2 p = (aPos + uOffset) / uResolution * 2.0 - 1.0;\n"
-    "    p.y = -p.y;\n"
-    "    gl_Position = vec4(p, 0.0, 1.0);\n"
-    "}\0";
- 
-const char *textFragSrc = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "uniform vec3 uColor;\n"
-    "void main() {\n"
-    "    FragColor = vec4(uColor, 1.0);\n"
-    "}\0";
- 
-class EasyFontRenderer {
-public:
-    unsigned int VAO = 0, VBO = 0, prog = 0;
- 
-    void init()
-	{
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        // space for text
-        glBufferData(GL_ARRAY_BUFFER, 1024 * 16 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
-        // use for xy only
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-        glBindVertexArray(0);
- 
-        auto comp = [](GLenum t, const char* src)
-		{
-            unsigned int s = glCreateShader(t);
-            glShaderSource(s, 1, &src, NULL);
-            glCompileShader(s);
-            return s;
-        };
-        unsigned int vs = comp(GL_VERTEX_SHADER,   textVertSrc);
-        unsigned int fs = comp(GL_FRAGMENT_SHADER, textFragSrc);
-        prog = glCreateProgram();
-        glAttachShader(prog, vs);
-		glAttachShader(prog, fs);
-        glLinkProgram(prog);
-        glDeleteShader(vs);
-		glDeleteShader(fs);
-    }
- 
-    // x y in viewport pixels
-    // vpW vpH - viewport dimensions
-    void draw(const char* text, float x, float y, float scale,
-		float r, float g, float b, float vpW, float vpH)
-    {
-        static char buf[1024 * 16];
-        int numQuads = stb_easy_font_print(0, 0, (char*)text, NULL, buf, sizeof(buf));
- 
-        // conver quads to triangles triángulos - 2 per quad = 6 vertex
-        struct V4 { float x, y, z, w; };
-        V4* verts = (V4*)buf;
- 
-        vector<float> tris;
-        tris.reserve(numQuads * 6 * 2);
-        for (int q = 0; q < numQuads; q++)
-		{
-            V4* v = verts + q * 4;
-            // tri 1
-            tris.push_back(v[0].x * scale); tris.push_back(v[0].y * scale); tris.push_back(0); tris.push_back(0);
-            tris.push_back(v[1].x * scale); tris.push_back(v[1].y * scale); tris.push_back(0); tris.push_back(0);
-            tris.push_back(v[2].x * scale); tris.push_back(v[2].y * scale); tris.push_back(0); tris.push_back(0);
-            // tri 2
-            tris.push_back(v[0].x * scale); tris.push_back(v[0].y * scale); tris.push_back(0); tris.push_back(0);
-            tris.push_back(v[2].x * scale); tris.push_back(v[2].y * scale); tris.push_back(0); tris.push_back(0);
-            tris.push_back(v[3].x * scale); tris.push_back(v[3].y * scale); tris.push_back(0); tris.push_back(0);
-        }
- 
-        glUseProgram(prog);
-        glUniform2f(glGetUniformLocation(prog, "uResolution"), vpW, vpH);
-        glUniform2f(glGetUniformLocation(prog, "uOffset"), x, y);
-        glUniform3f(glGetUniformLocation(prog, "uColor"), r, g, b);
- 
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, tris.size()*sizeof(float), tris.data());
-        glDrawArrays(GL_TRIANGLES, 0, (int)tris.size() / 4);
-        glBindVertexArray(0);
-    }
- 
-    void cleanup()
-	{
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
-        glDeleteProgram(prog);
-    }
-};
-
-// ===========================================================
-
-// STRUCTS
-
-struct Point
-{
-	float x, y;
-};
-
-struct DrawBatch
-{
-	int start, count;
-};
-
-// GRAPH
-
-class Graph
-{
-private:
-    int n;
-    vector<Point> pts;
-    vector<vector<float>> dist;
- 
-public:
-    Graph() {}
-	
-    Graph(const vector<Point>& centers)
-		: n((int)centers.size()), pts(centers)
-	{
-        dist.resize(n, vector<float>(n, 0.0f));
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++) {
-                float dx = pts[i].x - pts[j].x;
-                float dy = pts[i].y - pts[j].y;
-                dist[i][j] = sqrt(dx*dx + dy*dy);
-            }
-    }
-    float getDistance(int u, int v) const
-	{
-		return dist[u][v];
-	}
-    int size() const
-	{
-		return n;
-	}
-    const Point& getPoint(int i) const
-	{
-		return pts[i];
-	}
-};
-
-// GENETIC ALGORITHM
-
-class GeneticAlgorithm
-{
-private:
-    Graph& graph;
-    int populationSize;
-    double mutationRate;
- 
-    using Chromosome = vector<int>;
-    vector<Chromosome> population;
-    vector<mt19937> engines;
-
-public:
-    mutex          bestMutex;
-    Chromosome     bestChromosome;
-    float          bestFitness = 1e9f;
-    atomic<bool>   running{true};
- 
-    // for graphic
-    vector<float> historyBest;
-    vector<float> historyAvg;
-
-    GeneticAlgorithm(Graph& g, int popSize, double mutRate)
-        : graph(g), populationSize(popSize), mutationRate(mutRate)
-    {
-        random_device rd;
-        for (int i = 0; i < populationSize; ++i)
-            engines.emplace_back(rd());
-    }
- 
-    float fitness(const Chromosome& c)
-	{
-        float total = 0.0f;
-        for (int i = 0; i < (int)c.size() - 1; i++)
-            total += graph.getDistance(c[i], c[i+1]);
-        total += graph.getDistance(c.back(), c[0]);
-        return total;
-    }
-
-    void tournamentTask(int start, int end, vector<Chromosome>& nextPop, int engineIdx)
-	{
-        uniform_int_distribution<int> dist(0, populationSize - 1);
-        for (int k = start; k < end; k++)
-		{
-            int i = dist(engines[engineIdx]);
-            int j = dist(engines[engineIdx]);
-            nextPop[k] = (fitness(population[i]) < fitness(population[j]))
-				? population[i] : population[j];
-        }
-    }
-
-    void crossoverRangeTask(int start, int end, vector<Chromosome>& nextPop, int engineIdx)
-	{
-        int n = graph.size();
-        uniform_int_distribution<int> distPos(0, n - 1);
- 
-        for (int k = start; k < end - 1; k += 2)
-		{
-            int s = distPos(engines[engineIdx]);
-            int e = distPos(engines[engineIdx]);
-            if (s > e)
-				swap(s, e);
- 
-            Chromosome p1 = nextPop[k], p2 = nextPop[k+1];
-            Chromosome c1(n, -1), c2(n, -1);
- 
-            for (int i = s; i <= e; i++)
-			{
-				c1[i] = p1[i];
-				c2[i] = p2[i];
-			}
- 
-            auto fill = [&](Chromosome& child, const Chromosome& parent)
-			{
-                int curr = (e + 1) % n;
-                for (int i = 0; i < n; i++)
-				{
-                    int gene = parent[(e + 1 + i) % n];
-                    bool exists = false;
-                    for (int g : child)
-						if (g == gene)
-						{
-							exists = true;
-							break;
-						}
-                    if (!exists)
-					{
-						child[curr] = gene;
-						curr = (curr + 1) % n;
-					}
-                }
-            };
-            fill(c1, p2);
-			fill(c2, p1);
-            nextPop[k] = c1;
-			nextPop[k+1] = c2;
-        }
-    }
- 
-    void mutationTask(int start, int end, vector<Chromosome>& nextPop, int engineIdx)
-	{
-        uniform_real_distribution<double> prob(0.0, 1.0);
-        uniform_int_distribution<int> distGene(0, graph.size() - 1);
-        for (int k = start; k < end; k++)
-		{
-            if (prob(engines[engineIdx]) < mutationRate)
-                swap(nextPop[k][distGene(engines[engineIdx])],
-					nextPop[k][distGene(engines[engineIdx])]);
-        }
-    }
-
-    void run(int patience)
-	{
-        int n = graph.size();
-
-        for (int i = 0; i < populationSize; i++) {
-            Chromosome c(n);
-            iota(c.begin(), c.end(), 0);
-            shuffle(c.begin(), c.end(), engines[0]);
-            population.push_back(c);
-        }
-
-        int gen = 0, stayCount = 0;
-        int numThreads = min((int)thread::hardware_concurrency(), 8);
-        int chunkSize = max(1, populationSize / numThreads);
- 
-        while (stayCount < patience && running)
-		{
-            vector<Chromosome> nextPop(populationSize);
-            vector<thread> threads;
- 
-            // tourtnament
-            for (int i = 0; i < numThreads; i++)
-			{
-                int s = i * chunkSize;
-                int e = (i == numThreads-1) ? populationSize : s + chunkSize;
-                if (s < e)
-					threads.emplace_back(&GeneticAlgorithm::tournamentTask, this, s, e, ref(nextPop), i);
-            }
-            for (auto& t : threads)
-				t.join();
-			threads.clear();
- 
-            // crossover
-            for (int i = 0; i < numThreads; i++)
-			{
-                int s = i * chunkSize; if (s % 2 != 0) s--;
-                int e = (i == numThreads-1) ? populationSize : s + chunkSize;
-                if (s < e)
-					threads.emplace_back(&GeneticAlgorithm::crossoverRangeTask, this, s, e, ref(nextPop), i);
-            }
-            for (auto& t : threads)
-				t.join();
-			threads.clear();
- 
-            // mutation
-            for (int i = 0; i < numThreads; i++)
-			{
-                int s = i * chunkSize;
-                int e = (i == numThreads-1) ? populationSize : s + chunkSize;
-                if (s < e)
-					threads.emplace_back(&GeneticAlgorithm::mutationTask, this, s, e, ref(nextPop), i);
-            }
-            for (auto& t : threads)
-				t.join();
-			threads.clear();
- 
-            // selection
-            Chromosome bestInGen = population[0];
-            float minFit = fitness(population[0]);
-			float sumFit = 0.0f;
-            for (auto& c : population)
-			{
-                float f = fitness(c);
-				sumFit += f;
-                if (f < minFit)
-				{
-					minFit = f;
-					bestInGen = c;
-				}
-            }
-			float avgFit = sumFit / populationSize;
- 
-			historyAvg.push_back(avgFit);
-			historyBest.push_back(minFit);
-			lock_guard<mutex> lock(bestMutex);
- 
-            if (minFit < bestFitness)
-			{
-                bestFitness = minFit;
-                bestChromosome = bestInGen;
-				stayCount   = 0;
-            }
-			else
-                stayCount++;
- 
-            population = move(nextPop);
-			// elitism
-            //population[0] = bestInGen;
- 
-            cout << "Gen: " << gen << " - Mejor dist: " << bestFitness 
-				<< " Estanc: " << stayCount << endl;
-            gen++;
-        }
-		cout << "\nAG terminado\n";
-		/*
-        cout << "Mejor distancia: " << bestFitness << endl;
-        cout << "Ruta: ";
-        {
-            lock_guard<mutex> lock(bestMutex);
-            for (int x : bestChromosome)
-				cout << char('A' + x) << " ";
-        }
-		*/
-        cout << endl;
-    }
-};
-
-// ===========================================================
-
 // HELPERS OpenGL
  
 unsigned int compileShader(GLenum type, const char* src)
@@ -489,10 +102,6 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
 
     // glfw window creation
     // --------------------
@@ -528,12 +137,24 @@ int main()
 		return compileShader(GL_VERTEX_SHADER, vertexShaderSource);
 	};
  
-    unsigned int prog_edges = linkProgram(makeVS(), compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource_edges));
-    unsigned int prog_nodes = linkProgram(makeVS(), compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource_nodes));
-    unsigned int prog_route = linkProgram(makeVS(), compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource_route));
-    unsigned int prog_chartBest = linkProgram(makeVS(), compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource_chartBest));
-    unsigned int prog_chartAvg = linkProgram(makeVS(), compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource_chartAvg));
-	unsigned int prog_axes = linkProgram(makeVS(), compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource_axes));
+    unsigned int prog_edges = linkProgram(makeVS(), compileShader(
+		GL_FRAGMENT_SHADER, fragmentShaderSource_edges
+	));
+    unsigned int prog_nodes = linkProgram(makeVS(), compileShader(
+		GL_FRAGMENT_SHADER, fragmentShaderSource_nodes
+	));
+    unsigned int prog_route = linkProgram(makeVS(), compileShader(
+		GL_FRAGMENT_SHADER, fragmentShaderSource_route
+	));
+    unsigned int prog_chartBest = linkProgram(makeVS(), compileShader(
+		GL_FRAGMENT_SHADER, fragmentShaderSource_chartBest
+	));
+    unsigned int prog_chartAvg = linkProgram(makeVS(), compileShader(
+		GL_FRAGMENT_SHADER, fragmentShaderSource_chartAvg
+	));
+	unsigned int prog_axes = linkProgram(makeVS(), compileShader(
+		GL_FRAGMENT_SHADER, fragmentShaderSource_axes
+	));
 	
 	// set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -560,6 +181,7 @@ int main()
 	// inputs
 	int inPopSize, inPatience;
 	float inMutationRate;
+	char inElitism;
 	
 	cout<<"\nIngresar datos:\nPoblacion: ";
 	cin>>inPopSize;
@@ -567,9 +189,11 @@ int main()
 	cin>>inMutationRate;
 	cout<<"Limite de estancamiento: ";
 	cin>>inPatience;
+	cout<<"Elitismo(Y/N): ";
+	cin>>inElitism;
 	
 	// create GA
-    GeneticAlgorithm ga(graph, inPopSize, inMutationRate);
+    GeneticAlgorithm ga(graph, inPopSize, inMutationRate, inElitism);
     thread gaThread([&]()
 	{
 		ga.run(inPatience);
@@ -639,7 +263,8 @@ int main()
     glBindVertexArray(VAO_static);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO_static);
-	glBufferData(GL_ARRAY_BUFFER, staticVerts.size() * sizeof(float), staticVerts.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, staticVerts.size() * sizeof(float),
+		staticVerts.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -652,7 +277,8 @@ int main()
     glBindVertexArray(VAO_route);
 	
     glBindBuffer(GL_ARRAY_BUFFER, VBO_route);
-    glBufferData(GL_ARRAY_BUFFER, (NUM_NODES + 1) * 3 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, (NUM_NODES + 1) * 3 * sizeof(float),
+		nullptr, GL_DYNAMIC_DRAW);
 	
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -685,7 +311,8 @@ int main()
     glGenBuffers(1, &VBO_axes);
     glBindVertexArray(VAO_axes);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_axes);
-    glBufferData(GL_ARRAY_BUFFER, axesVerts.size()*sizeof(float), axesVerts.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, axesVerts.size()*sizeof(float),
+		axesVerts.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
@@ -748,7 +375,8 @@ int main()
                 routeVertCount = (int)(routeVerts.size() / 3);
  
                 glBindBuffer(GL_ARRAY_BUFFER, VBO_route);
-                glBufferSubData(GL_ARRAY_BUFFER, 0, routeVerts.size() * sizeof(float), routeVerts.data());
+                glBufferSubData(GL_ARRAY_BUFFER, 0, routeVerts.size() * sizeof(float),
+					routeVerts.data());
                 glBindBuffer(GL_ARRAY_BUFFER, 0);
             }
         }
@@ -772,11 +400,13 @@ int main()
  
             auto vBest = buildChartVerts(localBest, minVal, maxVal);
             glBindBuffer(GL_ARRAY_BUFFER, VBO_chartBest);
-            glBufferData(GL_ARRAY_BUFFER, vBest.size()*sizeof(float), vBest.data(), GL_DYNAMIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, vBest.size()*sizeof(float),
+				vBest.data(), GL_DYNAMIC_DRAW);
  
             auto vAvg = buildChartVerts(localAvg, minVal, maxVal);
             glBindBuffer(GL_ARRAY_BUFFER, VBO_chartAvg);
-            glBufferData(GL_ARRAY_BUFFER, vAvg.size()*sizeof(float), vAvg.data(), GL_DYNAMIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, vAvg.size()*sizeof(float),
+				vAvg.data(), GL_DYNAMIC_DRAW);
  
             glBindBuffer(GL_ARRAY_BUFFER, 0);
         }
