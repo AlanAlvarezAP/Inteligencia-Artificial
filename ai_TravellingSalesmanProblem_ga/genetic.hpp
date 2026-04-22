@@ -8,7 +8,6 @@
 #include <mutex>
 #include <atomic>
 
-
 #include "graph.hpp"
 
 class GeneticAlgorithm

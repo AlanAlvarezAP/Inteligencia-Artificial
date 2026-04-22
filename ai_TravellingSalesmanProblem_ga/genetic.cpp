@@ -106,8 +106,8 @@ void GeneticAlgorithm::run(int patience)
 	}
 
 	int gen = 0, stayCount = 0;
-	int numThreads = min((int)thread::hardware_concurrency(), 8);
-	int chunkSize = max(1, populationSize / numThreads);
+	int numThreads = min(populationSize, (int)thread::hardware_concurrency() * 2);
+	int chunkSize  = max(1, populationSize / numThreads);
 
 	while (stayCount < patience && running)
 	{
@@ -185,7 +185,7 @@ void GeneticAlgorithm::run(int patience)
 		population = move(nextPop);
 		// elitism
 		if (selectElitism == 'Y')
-			population[0] = bestInGen;
+			population[0] = bestChromosome;
 
 		cout << "Gen: " << gen << " - Mejor dist: " << bestFitness 
 			<< " Estanc: " << stayCount << endl;

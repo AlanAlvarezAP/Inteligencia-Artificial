@@ -18,7 +18,6 @@ const unsigned int SCR_HEIGHT = GRAPH_HEIGHT + CHART_HEIGHT;
 const int NUM_NODES = 10;
 
 // shaders
-
 const char *vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
     "void main()\n"
@@ -69,8 +68,6 @@ const char *fragmentShaderSource_axes = "#version 330 core\n"
 
 // ===========================================================
 
-// HELPERS OpenGL
- 
 unsigned int compileShader(GLenum type, const char* src)
 {
     unsigned int s = glCreateShader(type);
@@ -177,7 +174,6 @@ int main()
 	Graph graph(centers);
 	
 	// prepare genetic algorithm
-	
 	// inputs
 	int inPopSize, inPatience;
 	float inMutationRate;
