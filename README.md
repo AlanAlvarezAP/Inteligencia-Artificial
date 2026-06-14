@@ -19,6 +19,8 @@ Tareas y Proyectos del curso de **Inteligencia Artificial**
 ![Coloreo](https://img.shields.io/badge/ColoreoGrafos-100%25-green)  
 ![Algoritmos Geneticos Parser Matematico](https://img.shields.io/badge/AlgoritmosGeneticosParser-100%25-green)  
 ![Algoritmos Geneticos Viajero](https://img.shields.io/badge/AlgoritmosGeneticosViajero-100%25-green)  
+![Perceptron](https://img.shields.io/badge/Perceptron-100%25-green)  
+![Multi Layer Perceptron](https://img.shields.io/badge/MultiLayerPerceptron-100%25-green)  
 
 ## Pendientes:
 * Busquedas
@@ -51,3 +53,7 @@ Tareas y Proyectos del curso de **Inteligencia Artificial**
    - [x] Elitismo
    - [x] Threads
    - [x] Graficos
+* Perceptron
+   - [x] Si
+* Multi Layer Perceptron
+   - [x] Si
