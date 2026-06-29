@@ -11,6 +11,8 @@
 
 #include "data_loader.cuh"
 
+#include "MultiHeadAttention.cuh"
+
 class Transformer
 {
 public:
@@ -20,7 +22,9 @@ public:
         CLS(patch_embedding.dim_model, patch_embedding.num_patches, patch_embedding.n_images),
         position_encoding(CLS.num_patches + 1, CLS.dim_model, CLS.n_images),
         layer_norm(position_encoding.sequence_len,position_encoding.dim_model,position_encoding.n_images),
+        mha(position_encoding.n_images, position_encoding.sequence_len, position_encoding.dim_model, 4),
         learning_rate(in_learning_rate)
+
     { }
 
     Tensor Transformer::forward()
@@ -49,7 +53,12 @@ public:
         std::cout << "\n===== LAYER NORM =====\n";
         layer_norm.output.print(5);
 
-        return layer_norm.output;
+        std::cout << "\n===== MHA =====\n";
+        mha.previous = &layer_norm.output;
+        mha.forward();
+        mha.output.print(5);
+
+        return mha.output;
     }
 
     void zero_grad()
@@ -58,10 +67,14 @@ public:
         CLS.zero_grad();
         position_encoding.zero_grad();
         layer_norm.zero_grad();
+        mha.zero_grad();
     }
 
     void backward()
     {
+        mha.backward();
+        mha.update_weights(learning_rate);
+
         layer_norm.backward();
         layer_norm.update_weights(learning_rate);
 
@@ -83,6 +96,7 @@ private:
     CLSToken CLS;
     PositionalEncoding position_encoding;
     LayerNorm layer_norm;
+    MultiHeadAttention mha;
 };
 
 #endif
