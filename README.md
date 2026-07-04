@@ -20,7 +20,7 @@ Tareas y Proyectos del curso de **Inteligencia Artificial**
 ![Algoritmos Geneticos Parser Matematico](https://img.shields.io/badge/AlgoritmosGeneticosParser-100%25-green)  
 ![Algoritmos Geneticos Viajero](https://img.shields.io/badge/AlgoritmosGeneticosViajero-100%25-green)  
 ![Perceptron](https://img.shields.io/badge/Perceptron-100%25-green)  
-![Multi Layer Perceptron](https://img.shields.io/badge/MultiLayerPerceptron-100%25-green)
+![Multi Layer Perceptron](https://img.shields.io/badge/MultiLayerPerceptron-100%25-green)  
 ![Transformer](https://img.shields.io/badge/Transformer-100%25-green)
 
 ## Pendientes:
