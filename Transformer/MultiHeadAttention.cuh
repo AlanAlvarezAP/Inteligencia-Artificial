@@ -7,7 +7,8 @@
 #include "tensor.cuh"
 #include "utils.cuh"
 
-__global__ void mha_linear(const float* __restrict__ in, const float* __restrict__ W, const float* __restrict__ b, float* __restrict__ out, int seq_len, int dim_model)
+__global__
+void mha_linear(const float* __restrict__ in, const float* __restrict__ W, const float* __restrict__ b, float* __restrict__ out, int seq_len, int dim_model)
 {
 	int img = blockIdx.x;
 	int tok = blockIdx.y;
@@ -23,7 +24,8 @@ __global__ void mha_linear(const float* __restrict__ in, const float* __restrict
 	}
 }
 
-__global__ void mha_scores(const float* __restrict__ Q, const float* __restrict__ K, float* __restrict__ S, int seq_len, int n_heads, int head_dim, float scale)
+__global__
+void mha_scores(const float* __restrict__ Q, const float* __restrict__ K, float* __restrict__ S, int seq_len, int n_heads, int head_dim, float scale)
 {
 	int img = blockIdx.x;
 	int h = blockIdx.y;
@@ -44,7 +46,8 @@ __global__ void mha_scores(const float* __restrict__ Q, const float* __restrict_
 	S[img * s_stride + h * seq_len * seq_len + i * seq_len + j] = dot * scale;
 }
 
-__global__ void mha_softmax(float* __restrict__ S, int seq_len, int n_heads)
+__global__
+void mha_softmax(float* __restrict__ S, int seq_len, int n_heads)
 {
 	int img = blockIdx.x;
 	int h = blockIdx.y;
@@ -89,7 +92,8 @@ __global__ void mha_softmax(float* __restrict__ S, int seq_len, int n_heads)
 		S[base + j] *= inv_sum;
 }
 
-__global__ void mha_attn_out(const float* __restrict__ A, const float* __restrict__ V, float* __restrict__ O, int seq_len, int n_heads, int head_dim)
+__global__
+void mha_attn_out(const float* __restrict__ A, const float* __restrict__ V, float* __restrict__ O, int seq_len, int n_heads, int head_dim)
 {
 	int img = blockIdx.x;
 	int h = blockIdx.y;
@@ -109,7 +113,8 @@ __global__ void mha_attn_out(const float* __restrict__ A, const float* __restric
 	O[o_base + k] = sum;
 }
 
-__global__ void mha_concat(const float* __restrict__ O, float* __restrict__ concat, int seq_len, int n_heads, int head_dim)
+__global__
+void mha_concat(const float* __restrict__ O, float* __restrict__ concat, int seq_len, int n_heads, int head_dim)
 {
 	int img = blockIdx.x;
 	int tok = blockIdx.y;
@@ -126,7 +131,8 @@ __global__ void mha_concat(const float* __restrict__ O, float* __restrict__ conc
 	}
 }
 
-__global__ void mha_linear_backward_W(const float* __restrict__ d_out, const float* __restrict__ in, float* __restrict__ dW, int seq_len, int dim_model)
+__global__
+void mha_linear_backward_W(const float* __restrict__ d_out, const float* __restrict__ in, float* __restrict__ dW, int seq_len, int dim_model)
 {
 	int img = blockIdx.x;
 	int tok = blockIdx.y;
@@ -140,7 +146,8 @@ __global__ void mha_linear_backward_W(const float* __restrict__ d_out, const flo
 	}
 }
 
-__global__ void mha_bias_backward(const float* __restrict__ d_out, float* __restrict__ db, int seq_len, int dim_model)
+__global__
+void mha_bias_backward(const float* __restrict__ d_out, float* __restrict__ db, int seq_len, int dim_model)
 {
 	int img = blockIdx.x;
 	int tok = blockIdx.y;
@@ -151,7 +158,8 @@ __global__ void mha_bias_backward(const float* __restrict__ d_out, float* __rest
 		atomicAdd(&db[col], d_out[base + col]);
 }
 
-__global__ void mha_linear_backward_in(const float* __restrict__ d_out, const float* __restrict__ W, float* __restrict__ d_in, int seq_len, int dim_model)
+__global__
+void mha_linear_backward_in(const float* __restrict__ d_out, const float* __restrict__ W, float* __restrict__ d_in, int seq_len, int dim_model)
 {
 	int img = blockIdx.x;
 	int tok = blockIdx.y;
@@ -166,7 +174,8 @@ __global__ void mha_linear_backward_in(const float* __restrict__ d_out, const fl
 	}
 }
 
-__global__ void mha_backward_AV(const float* __restrict__ dO, const float* __restrict__ A, const float* __restrict__ V, float* __restrict__ dA, float* __restrict__ dV, int seq_len, int n_heads, int head_dim)
+__global__
+void mha_backward_AV(const float* __restrict__ dO, const float* __restrict__ A, const float* __restrict__ V, float* __restrict__ dA, float* __restrict__ dV, int seq_len, int n_heads, int head_dim)
 {
 	int img = blockIdx.x;
 	int h = blockIdx.y;
@@ -189,7 +198,8 @@ __global__ void mha_backward_AV(const float* __restrict__ dO, const float* __res
 		atomicAdd(&dV[v_base + k], aij * dO[o_base + k]);
 }
 
-__global__ void mha_softmax_backward(float* __restrict__ dA, const float* __restrict__ A, int seq_len, int n_heads)
+__global__
+void mha_softmax_backward(float* __restrict__ dA, const float* __restrict__ A, int seq_len, int n_heads)
 {
 	int img = blockIdx.x;
 	int h = blockIdx.y;
@@ -218,7 +228,8 @@ __global__ void mha_softmax_backward(float* __restrict__ dA, const float* __rest
 		dA[base + j] = A[base + j] * (dA[base + j] - dot);
 }
 
-__global__ void mha_backward_QK(const float* __restrict__ dS, const float* __restrict__ Q, const float* __restrict__ K, float* __restrict__ dQ, float* __restrict__ dK, int seq_len, int n_heads, int head_dim, float scale)
+__global__
+void mha_backward_QK(const float* __restrict__ dS, const float* __restrict__ Q, const float* __restrict__ K, float* __restrict__ dQ, float* __restrict__ dK, int seq_len, int n_heads, int head_dim, float scale)
 {
 	int img = blockIdx.x;
 	int h = blockIdx.y;
@@ -240,7 +251,8 @@ __global__ void mha_backward_QK(const float* __restrict__ dS, const float* __res
 		atomicAdd(&dK[img * qk_stride + h * seq_len * head_dim + j * head_dim + k], dS[ds_base + j] * Q[q_base + k] * scale);
 }
 
-__global__ void mha_split(const float* __restrict__ in, float* __restrict__ out, int seq_len, int n_heads, int head_dim)
+__global__
+void mha_split(const float* __restrict__ in, float* __restrict__ out, int seq_len, int n_heads, int head_dim)
 {
 	int img = blockIdx.x;
 	int tok = blockIdx.y;
@@ -257,7 +269,8 @@ __global__ void mha_split(const float* __restrict__ in, float* __restrict__ out,
 	}
 }
 
-__global__ void mha_unsplit(const float* __restrict__ in, float* __restrict__ out, int seq_len, int n_heads, int head_dim)
+__global__
+void mha_unsplit(const float* __restrict__ in, float* __restrict__ out, int seq_len, int n_heads, int head_dim)
 {
 	int img = blockIdx.x;
 	int tok = blockIdx.y;
@@ -416,16 +429,19 @@ public:
 		int threads = 256;
 		int blocks = (W_size + threads - 1) / threads;
 
-		sgd_update << <blocks, threads >> > (Wq.data, Wq.gradient, lr, W_size);
-		sgd_update << <blocks, threads >> > (Wk.data, Wk.gradient, lr, W_size);
-		sgd_update << <blocks, threads >> > (Wv.data, Wv.gradient, lr, W_size);
-		sgd_update << <blocks, threads >> > (Wo.data, Wo.gradient, lr, W_size);
+		float effective_lr = lr / (float)(n_images * seq_len);
+
+		sgd_update << <blocks, threads >> > (Wq.data, Wq.gradient, effective_lr, W_size);
+		sgd_update << <blocks, threads >> > (Wk.data, Wk.gradient, effective_lr, W_size);
+		sgd_update << <blocks, threads >> > (Wv.data, Wv.gradient, effective_lr, W_size);
+		sgd_update << <blocks, threads >> > (Wo.data, Wo.gradient, effective_lr, W_size);
 
 		int b_blocks = (dim_model + threads - 1) / threads;
-		sgd_update << <b_blocks, threads >> > (bq.data, bq.gradient, lr, dim_model);
-		sgd_update << <b_blocks, threads >> > (bk.data, bk.gradient, lr, dim_model);
-		sgd_update << <b_blocks, threads >> > (bv.data, bv.gradient, lr, dim_model);
-		sgd_update << <b_blocks, threads >> > (bo.data, bo.gradient, lr, dim_model);
+		float effective_lr_b = lr / (float)(n_images * seq_len);
+		sgd_update << <b_blocks, threads >> > (bq.data, bq.gradient, effective_lr_b, dim_model);
+		sgd_update << <b_blocks, threads >> > (bk.data, bk.gradient, effective_lr_b, dim_model);
+		sgd_update << <b_blocks, threads >> > (bv.data, bv.gradient, effective_lr_b, dim_model);
+		sgd_update << <b_blocks, threads >> > (bo.data, bo.gradient, effective_lr_b, dim_model);
 		cudaDeviceSynchronize();
 	}
 

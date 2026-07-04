@@ -72,18 +72,125 @@ int main()
     std::cout << "- image size: " << train_data.image_size << "\n";
     std::cout << "- number of images: " << train_data.n_samples << "\n";
 
-    Transformer testin(train_data, 0.1f);
 
-    auto data = testin.forward();
+    int batch_size = 128;
+    float learning_rate = 0.001f;
 
-    testin.backward();
-    testin.zero_grad();
-    
+    float accuracy_train = 0.0f, accuracy_eval = 0.0f;
 
-    //data.print();
-    auto cpu_data = data.get_data_CPU();
-    std::cout << "DATA  SIZE: " << cpu_data.size() << "\n";
+    Transformer* testin = nullptr;
+    bool can_work = false;
 
-    test_layernorm();
+    while (true)
+    {
+        int option = 0;
+
+        std::cout << "========= Transformer MENU =========\n";
+        std::cout << "1. Load weights\n";
+        std::cout << "2. Train\n";
+        std::cout << "3. Test\n";
+        std::cout << "4. Info\n";
+        std::cout << "====================================\n";
+        std::cout << "Enter option: ";
+        std::cin >> option;
+
+        switch (option)
+        {
+        case 1:
+        {
+            testin = load_transformer("checkpoint.txt", accuracy_train, accuracy_eval);
+            can_work = true;
+            std::cout << "DATA LOADED\n";
+            break;
+        }
+        case 2:
+        {
+            if (testin)
+                delete testin;
+                
+            testin = new Transformer(batch_size, learning_rate);
+            can_work = true;
+
+
+            float total_loss = 0.0f;
+            int total_correct = 0;
+            int max_epochs = 10;
+
+            std::cout << "Training started\n";
+            for (int epoch = 1; epoch <= max_epochs; epoch++)
+            {
+                total_correct = 0;
+
+                std::cout << "EPOCH " << epoch << "/" << max_epochs << "\n";
+
+                for (int i = 0; i < train_data.n_samples; i += batch_size)
+                {
+                    std::vector<float> batch_images, batch_labels;
+                    std::vector<int> batch_labels_int;
+
+
+                    batch_labels_int = train_data.get_batch_labels_int(i, batch_size);
+                    train_data.get_batch(i, batch_size, batch_images, batch_labels);
+
+                    testin->set_batch(batch_images);
+
+                    auto output = testin->forward();
+
+                    Tensor expected(batch_labels);
+                    testin->backward(expected);
+                    testin->zero_grad();
+
+                    // Accuracy testing
+                    auto preds = testin->class_head.predictions();
+                    for (int j = 0; j < batch_labels_int.size(); j++)
+                        if (preds[j] == batch_labels_int[j])
+                            total_correct++;
+
+                    // Print cada 100 batches
+                    if ((i / batch_size) % 100 == 0)
+                    {
+                        float partial_acc = (float)total_correct / (i + batch_size) * 100.0f;
+                        std::cout << "  batch " << i / batch_size << "/" << train_data.n_samples / batch_size << "  acc parcial: " << partial_acc << "%\n";
+                    }
+                }
+            }
+
+            accuracy_train = (float)total_correct / train_data.n_samples * 100.0f;
+            std::cout << " - Train acc: " << accuracy_train << "%\n";
+            break;
+        }
+        case 3:
+        {
+            int eval_correct = 0;
+            for (int i = 0; i < evaluation_data.n_samples; i += batch_size)
+            {
+                std::vector<float> batch_images, batch_labels_onehot;
+                std::vector<int> batch_labels_int;
+                evaluation_data.get_batch(i, batch_size, batch_images, batch_labels_onehot);
+                batch_labels_int = evaluation_data.get_batch_labels_int(i, batch_size);
+
+                testin->set_batch(batch_images);
+                testin->forward();
+
+                auto preds = testin->class_head.predictions();
+                for (int j = 0; j < batch_labels_int.size(); j++)
+                    if (preds[j] == batch_labels_int[j])
+                        eval_correct++;
+            }
+
+            accuracy_eval = (float)eval_correct / evaluation_data.n_samples * 100.0f;
+            std::cout << " - Eval acc: " << accuracy_eval << "%\n";
+            break;
+        }
+        case 4:
+        {
+            std::cout << "Transformer Info\n";
+            std::cout << "- Training accuracy: " << accuracy_train << "\n";
+            std::cout << "- Evaluation accuracy: " << accuracy_eval << "\n";
+            break;
+        }
+        }
+    }
+
     return 0;
 }
